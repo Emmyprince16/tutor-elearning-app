@@ -59,14 +59,15 @@ export default function Home() {
           <p className="text-gray-500">No tutors match your search.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTutors.map((tutor) => (
-              <TutorCard
-                key={tutor.id}
-                name={tutor.name}
-                subject={tutor.subject}
-                rating={tutor.rating}
-              />
-            ))}
+           {filteredTutors.map((tutor) => (
+  <TutorCard
+    key={tutor.id}
+    id={tutor.id}
+    name={tutor.name}
+    subject={tutor.subject}
+    rating={tutor.rating}
+  />
+))}
           </div>
         )}
       </div>
