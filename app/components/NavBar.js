@@ -24,7 +24,7 @@ function NavBar() {
           <a href="#" className="hover:text-yellow-400 transition-colors">Home</a>
           <a href="#" className="hover:text-yellow-400 transition-colors">Tutors</a>
           <a href="#" className="hover:text-yellow-400 transition-colors">Departments</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Login</a>
+          <a href="/login" className="hover:text-yellow-400 transition-colors">Login</a>
         </div>
 
         <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
@@ -37,7 +37,7 @@ function NavBar() {
           <a href="#" className="hover:text-yellow-400 transition-colors">Home</a>
           <a href="#" className="hover:text-yellow-400 transition-colors">Tutors</a>
           <a href="#" className="hover:text-yellow-400 transition-colors">Departments</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Login</a>
+          <a href="/login" className="hover:text-yellow-400 transition-colors">Login</a>
         </div>
       )}
     </nav>
