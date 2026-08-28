@@ -23,10 +23,10 @@ export default function LoginPage() {
     }
 
     const passwordRegex =
-  /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/;
+  /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
 if (!passwordRegex.test(password)) {
   newErrors.password =
-    "Password must be 8-12 characters, with at least 1 capital letter, 1 number, and 1 symbol";
+    "Password must be 8-20 characters, with at least 1 capital letter, 1 number, and 1 symbol";
 }
 
     if (!isLogin) {
@@ -39,7 +39,7 @@ if (!passwordRegex.test(password)) {
     return Object.keys(newErrors).length === 0;
   }
 
-  const hasLength = password.length >= 8 && password.length <= 12;
+  const hasLength = password.length >= 8 && password.length <= 20;
 const hasCapital = /[A-Z]/.test(password);
 const hasNumber = /[0-9]/.test(password);
 const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
@@ -206,7 +206,7 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
                <ul className="mt-2 text-sm flex flex-col gap-1">
   <li className={`flex items-center gap-1 ${hasLength ? "text-green-700" : "text-gray-400"}`}>
     {hasLength ? <Check size={14} /> : <X size={14} />}
-    8-12 characters
+    8- 20 characters
   </li>
   <li className={`flex items-center gap-1 ${hasCapital ? "text-green-700" : "text-gray-400"}`}>
     {hasCapital ? <Check size={14} /> : <X size={14} />}
