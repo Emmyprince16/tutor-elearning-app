@@ -44,13 +44,48 @@ const hasCapital = /[A-Z]/.test(password);
 const hasNumber = /[0-9]/.test(password);
 const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const isValid = validate();
-    if (isValid) {
-      alert(isLogin ? "Login successful (demo)" : "Account created (demo)");
-    }
+ async function handleSubmit(e) {
+  e.preventDefault();
+  const isValid = validate();
+  if (!isValid) return;
+
+  if (isLogin) {
+    alert("Login successful (demo) — login API comes next");
+    return;
   }
+
+  try {
+    const response = await fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName,
+        middleName,
+        lastName,
+        email,
+        password,
+        role,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setErrors({ form: data.error });
+      return;
+    }
+
+    alert("Account created successfully! You can now log in.");
+    setIsLogin(true);
+    setFirstName("");
+    setMiddleName("");
+    setLastName("");
+    setEmail("");
+    setPassword("");
+  } catch (error) {
+    setErrors({ form: "Network error. Please try again." });
+  }
+}
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4 py-10">
@@ -236,6 +271,12 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
             >
               {isLogin ? "Log In" : "Sign Up"}
             </button>
+{errors.form && (
+  <p className="text-red-600 text-sm text-center flex items-center justify-center gap-1">
+    <AlertCircle size={14} /> {errors.form}
+  </p>
+)}
+
           </form>
 
           <p className="text-center text-gray-500 mt-6">
