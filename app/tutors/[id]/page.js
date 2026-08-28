@@ -89,15 +89,21 @@ export default function TutorProfile({ params }) {
 
         <hr className="my-6" />
 
-        {success ? (
-          <div className="flex flex-col items-center text-center gap-2 py-6">
-            <CheckCircle className="text-green-700" size={40} />
-            <h2 className="text-xl font-bold text-gray-900">Session Booked!</h2>
-            <p className="text-gray-600">
-              Your session with {tutor.name} on {date} at {time} has been requested.
-            </p>
-          </div>
-        ) : (
+       {success ? (
+  <div className="flex flex-col items-center text-center gap-3 py-6">
+    <CheckCircle className="text-green-700" size={40} />
+    <h2 className="text-xl font-bold text-gray-900">Session Booked!</h2>
+    <p className="text-gray-600">
+      Your session with {tutor.name} on {date} at {time} has been requested.
+    </p>
+    <Link
+      href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
+      className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 transition-colors"
+    >
+      Join Video Session
+    </Link>
+  </div>
+) : (
           <form onSubmit={handleBooking} className="flex flex-col gap-4">
             <h2 className="font-semibold text-gray-900">Book a Session</h2>
 
