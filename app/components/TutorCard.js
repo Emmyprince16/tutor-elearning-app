@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Star } from "lucide-react";
 
 
 function TutorCard(props) {
-  const [booked, setBooked] = useState(false);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow">
@@ -21,12 +19,12 @@ function TutorCard(props) {
   {props.rating}
 </p>
 
-      <button
-        onClick={() => setBooked(true)}
-        className="mt-3 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 transition-colors"
-      >
-        {booked ? "Booked!" : "Book Session"}
-      </button>
+     <Link
+  href={`/tutors/${props.id}`}
+  className="mt-3 inline-block bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 transition-colors text-center"
+>
+  Book Session
+</Link>
     </div>
   );
 }
