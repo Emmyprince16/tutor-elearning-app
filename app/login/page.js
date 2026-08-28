@@ -49,10 +49,28 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
   const isValid = validate();
   if (!isValid) return;
 
-  if (isLogin) {
-    alert("Login successful (demo) — login API comes next");
-    return;
+if (isLogin) {
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setErrors({ form: data.error });
+      return;
+    }
+
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/";
+  } catch (error) {
+    setErrors({ form: "Network error. Please try again." });
   }
+  return;
+}
 
   try {
     const response = await fetch("/api/signup", {
