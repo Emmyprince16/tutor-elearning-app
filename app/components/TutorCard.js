@@ -7,7 +7,7 @@ import { Star } from "lucide-react";
 function TutorCard(props) {
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow">
+    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow animate-fade-in">
      <Link href={`/tutors/${props.id}`}>
   <h2 className="text-xl font-bold text-gray-900 hover:text-green-800 transition-colors cursor-pointer">
     {props.name}

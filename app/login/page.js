@@ -6,6 +6,7 @@ import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X } from "lucide-r
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState("student");
+  const [loading, setLoading] = useState(false);
 
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -49,28 +50,32 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
   const isValid = validate();
   if (!isValid) return;
 
-if (isLogin) {
-  try {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+  setLoading(true);
 
-    const data = await response.json();
+  if (isLogin) {
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      setErrors({ form: data.error });
-      return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({ form: data.error });
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.location.href = "/";
+    } catch (error) {
+      setErrors({ form: "Network error. Please try again." });
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("user", JSON.stringify(data.user));
-    window.location.href = "/";
-  } catch (error) {
-    setErrors({ form: "Network error. Please try again." });
+    return;
   }
-  return;
-}
 
   try {
     const response = await fetch("/api/signup", {
@@ -102,6 +107,8 @@ if (isLogin) {
     setPassword("");
   } catch (error) {
     setErrors({ form: "Network error. Please try again." });
+  } finally {
+    setLoading(false);
   }
 }
 
@@ -284,11 +291,12 @@ if (isLogin) {
             </div>
 
                         <button
-              type="submit"
-              className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 transition-colors mt-2"
-            >
-              {isLogin ? "Log In" : "Sign Up"}
-            </button>
+  type="submit"
+  disabled={loading}
+  className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 transition-colors mt-2 disabled:opacity-60"
+>
+  {loading ? "Please wait..." : isLogin ? "Log In" : "Sign Up"}
+</button>
 {errors.form && (
   <p className="text-red-600 text-sm text-center flex items-center justify-center gap-1">
     <AlertCircle size={14} /> {errors.form}
