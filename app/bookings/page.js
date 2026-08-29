@@ -124,6 +124,14 @@ export default function MyBookingsPage() {
                   </button>
                 )}
 
+                
+              <a href={`/api/bookings/${booking.id}/ics`}
+                  className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+                >
+                  <Calendar size={16} />
+                  Add to Calendar
+                </a>
+
                 <Link
                   href={`/session/tutor${booking.tutorId}-${booking.date}-${booking.time}`.replace(/[: ,]/g, "")}
                   className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
