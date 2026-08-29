@@ -21,7 +21,7 @@ function TutorCard(props) {
 
      <Link
   href={`/tutors/${props.id}`}
-  className="mt-3 inline-block bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 transition-colors text-center"
+  className="mt-3 inline-block bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200 text-center"
 >
   Book Session
 </Link>

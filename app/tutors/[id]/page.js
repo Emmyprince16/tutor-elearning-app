@@ -67,7 +67,7 @@ export default function TutorProfile({ params }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+   <div className="max-w-2xl mx-auto p-6 animate-fade-in">
       <Link
         href="/"
         className="inline-flex items-center gap-1 text-green-800 mb-4 hover:underline"
@@ -76,7 +76,7 @@ export default function TutorProfile({ params }) {
         Back to all tutors
       </Link>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 animate-fade-in-scale">
         <h1 className="text-2xl font-bold text-gray-900">{tutor.name}</h1>
         <p className="text-gray-600 mt-1">{tutor.subject}</p>
         <p className="text-yellow-600 flex items-center gap-1 mt-2">
@@ -97,9 +97,9 @@ export default function TutorProfile({ params }) {
       Your session with {tutor.name} on {date} at {time} has been requested.
     </p>
     <Link
-      href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
-      className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 transition-colors"
-    >
+  href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
+  className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+>
       Join Video Session
     </Link>
   </div>
@@ -136,9 +136,9 @@ export default function TutorProfile({ params }) {
             {error && <p className="text-red-600 text-sm">{error}</p>}
 
             <button
-              type="submit"
-              className="bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 transition-colors"
-            >
+  type="submit"
+  className="bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+>
               {user ? "Book a Session" : "Log in to Book"}
             </button>
           </form>

@@ -293,7 +293,7 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
                         <button
   type="submit"
   disabled={loading}
-  className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 transition-colors mt-2 disabled:opacity-60"
+  className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200 disabled:opacity-60"
 >
   {loading ? "Please wait..." : isLogin ? "Log In" : "Sign Up"}
 </button>
