@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TutorCard from "../components/TutorCard";
-import { tutors } from "../data/tutors";
 import { Search } from "lucide-react";
 
 export default function TutorsPage() {
+  const [tutors, setTutors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOption, setSelectedOption] = useState("All");
+
+  useEffect(() => {
+    fetch("/api/tutors")
+      .then((res) => res.json())
+      .then((data) => setTutors(data.tutors || []));
+  }, []);
 
   const options = ["All", "AI", "NCC", "Cybersecurity", "SWD", "General"];
 
   const filteredTutors = tutors.filter((tutor) => {
+    const fullName = `${tutor.firstName} ${tutor.lastName}`.toLowerCase();
     const matchesSearch =
-      tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tutor.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      fullName.includes(searchTerm.toLowerCase()) ||
+      (tutor.subject || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesOption =
       selectedOption === "All" || tutor.option === selectedOption;
     return matchesSearch && matchesOption;
@@ -35,15 +42,15 @@ export default function TutorsPage() {
             placeholder="Search by name or subject..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           />
         </div>
 
-       <select
-  value={selectedOption}
-  onChange={(e) => setSelectedOption(e.target.value)}
-  className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
->
+        <select
+          value={selectedOption}
+          onChange={(e) => setSelectedOption(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+        >
           {options.map((opt) => (
             <option key={opt} value={opt} className="text-gray-900">
               {opt}
@@ -60,7 +67,7 @@ export default function TutorsPage() {
             <TutorCard
               key={tutor.id}
               id={tutor.id}
-              name={tutor.name}
+              name={`${tutor.firstName}, ${tutor.lastName}`}
               subject={tutor.subject}
               rating={tutor.rating}
             />

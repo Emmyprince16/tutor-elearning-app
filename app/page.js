@@ -1,9 +1,19 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Hero from "./components/Hero";
 import TutorCard from "./components/TutorCard";
-import { tutors } from "./data/tutors";
 import Link from "next/link";
 
 export default function Home() {
+  const [tutors, setTutors] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/tutors")
+      .then((res) => res.json())
+      .then((data) => setTutors(data.tutors || []));
+  }, []);
+
   const featuredTutors = tutors.slice(0, 3);
 
   return (
@@ -21,7 +31,7 @@ export default function Home() {
             <TutorCard
               key={tutor.id}
               id={tutor.id}
-              name={tutor.name}
+              name={`${tutor.firstName}, ${tutor.lastName}`}
               subject={tutor.subject}
               rating={tutor.rating}
             />

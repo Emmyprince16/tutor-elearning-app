@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { tutors } from "../../data/tutors";
 import { Star, ArrowLeft, Calendar, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function TutorProfile({ params }) {
   const resolvedParams = use(params);
-  const tutor = tutors.find((t) => t.id === parseInt(resolvedParams.id));
+  const [tutor, setTutor] = useState(null);
+  const [loadingTutor, setLoadingTutor] = useState(true);
 
   const [user, setUser] = useState(null);
   const [date, setDate] = useState("");
@@ -22,28 +22,36 @@ export default function TutorProfile({ params }) {
     }
   }, []);
 
- async function handleBooking(e) {
-  e.preventDefault();
-  setError("");
+  useEffect(() => {
+    fetch(`/api/tutors/${resolvedParams.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTutor(data.tutor || null);
+        setLoadingTutor(false);
+      });
+  }, [resolvedParams.id]);
 
-  if (!user) {
-    window.location.href = "/login";
-    return;
-  }
+  async function handleBooking(e) {
+    e.preventDefault();
+    setError("");
 
-  if (!date || !time) {
-    setError("Please select both a date and time.");
-    return;
-  }
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
 
-  const selectedDateTime = new Date(`${date}T${time}`);
-  const now = new Date();
+    if (!date || !time) {
+      setError("Please select both a date and time.");
+      return;
+    }
 
-  if (selectedDateTime < now) {
-    setError("You can't book a session in the past. Please choose a future date and time.");
-    return;
-  }
+    const selectedDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
 
+    if (selectedDateTime < now) {
+      setError("You can't book a session in the past. Please choose a future date and time.");
+      return;
+    }
 
     try {
       const response = await fetch("/api/bookings", {
@@ -51,7 +59,7 @@ export default function TutorProfile({ params }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studentId: user.id,
-          tutorName: tutor.name,
+          tutorName: `${tutor.firstName}, ${tutor.lastName}`,
           subject: tutor.subject,
           date,
           time,
@@ -71,14 +79,18 @@ export default function TutorProfile({ params }) {
     }
   }
 
+  if (loadingTutor) {
+    return <p className="p-6">Loading tutor profile...</p>;
+  }
+
   if (!tutor) {
     return <p className="p-6">Tutor not found.</p>;
   }
 
   return (
-   <div className="max-w-2xl mx-auto p-6 animate-fade-in">
+    <div className="max-w-2xl mx-auto p-6 animate-fade-in">
       <Link
-        href="/"
+        href="/tutors"
         className="inline-flex items-center gap-1 text-green-800 mb-4 hover:underline"
       >
         <ArrowLeft size={18} />
@@ -86,7 +98,9 @@ export default function TutorProfile({ params }) {
       </Link>
 
       <div className="bg-white rounded-lg shadow-md p-6 animate-fade-in-scale">
-        <h1 className="text-2xl font-bold text-gray-900">{tutor.name}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {tutor.firstName}, {tutor.lastName}
+        </h1>
         <p className="text-gray-600 mt-1">{tutor.subject}</p>
         <p className="text-yellow-600 flex items-center gap-1 mt-2">
           <Star size={18} fill="currentColor" />
@@ -95,24 +109,25 @@ export default function TutorProfile({ params }) {
         <p className="mt-4 text-gray-700">
           Specialization: <span className="font-medium">{tutor.option}</span>
         </p>
+        {tutor.bio && <p className="mt-4 text-gray-700">{tutor.bio}</p>}
 
         <hr className="my-6" />
 
-       {success ? (
-  <div className="flex flex-col items-center text-center gap-3 py-6">
-    <CheckCircle className="text-green-700" size={40} />
-    <h2 className="text-xl font-bold text-gray-900">Session Booked!</h2>
-    <p className="text-gray-600">
-      Your session with {tutor.name} on {date} at {time} has been requested.
-    </p>
-    <Link
-  href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
-  className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
->
-      Join Video Session
-    </Link>
-  </div>
-) : (
+        {success ? (
+          <div className="flex flex-col items-center text-center gap-3 py-6">
+            <CheckCircle className="text-green-700" size={40} />
+            <h2 className="text-xl font-bold text-gray-900">Session Booked!</h2>
+            <p className="text-gray-600">
+              Your session with {tutor.firstName} on {date} at {time} has been requested.
+            </p>
+            <Link
+              href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
+              className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+            >
+              Join Video Session
+            </Link>
+          </div>
+        ) : (
           <form onSubmit={handleBooking} className="flex flex-col gap-4">
             <h2 className="font-semibold text-gray-900">Book a Session</h2>
 
@@ -124,30 +139,31 @@ export default function TutorProfile({ params }) {
               <input
                 type="date"
                 value={date}
+                min={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
               />
             </div>
 
             <div className="relative">
-  <Clock
-    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-    size={18}
-  />
-  <input
-    type="time"
-    value={time}
-    onChange={(e) => setTime(e.target.value)}
-    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
-  />
-</div>
+              <Clock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+              />
+            </div>
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
 
             <button
-  type="submit"
-  className="bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
->
+              type="submit"
+              className="bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+            >
               {user ? "Book a Session" : "Log in to Book"}
             </button>
           </form>
