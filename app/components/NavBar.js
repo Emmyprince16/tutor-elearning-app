@@ -50,9 +50,9 @@ function NavBar() {
         </div>
 
         <div className="hidden md:flex gap-6 font-medium items-center">
-          <a href="#" className="hover:text-yellow-400 transition-colors">Home</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Tutors</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Departments</a>
+          <a href="/" className="hover:text-yellow-400 transition-colors">Home</a>
+<a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
+<a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
