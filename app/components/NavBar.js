@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, Menu, X, ChevronDown, LogOut, User } from "lucide-react";
+import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -10,6 +10,10 @@ function NavBar() {
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -23,6 +27,9 @@ function NavBar() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setNotifOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -31,10 +38,39 @@ function NavBar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!user || user.role !== "student") return;
+
+    const fetchNotifications = () => {
+      fetch(`/api/notifications?studentId=${user.id}`)
+        .then((res) => res.json())
+        .then((data) => setNotifications(data.notifications || []))
+        .catch((err) => console.error("Error fetching notifications:", err));
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 20000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   function handleLogout() {
     localStorage.removeItem("user");
     setUser(null);
     window.location.href = "/";
+  }
+
+  function handleNotifToggle() {
+    const opening = !notifOpen;
+    setNotifOpen(opening);
+
+    if (opening && notifications.length > 0) {
+      fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: user.id }),
+      }).catch((err) => console.error("Error marking notifications read:", err));
+    }
   }
 
   return (
@@ -52,8 +88,54 @@ function NavBar() {
 
         <div className="hidden md:flex gap-6 font-medium items-center">
           <a href="/" className="hover:text-yellow-400 transition-colors">Home</a>
-<a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
-<a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+          <a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
+          <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+
+          {user && user.role === "student" && (
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={handleNotifToggle}
+                className="relative focus:outline-none"
+              >
+                <Bell size={22} />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+
+              {notifOpen && (
+                <div className="absolute right-0 mt-2 w-72 bg-white text-gray-900 rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto">
+                  <div className="px-4 py-3 border-b border-gray-100 font-medium">
+                    Notifications
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <p className="px-4 py-4 text-sm text-gray-500">
+                      No new notifications.
+                    </p>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50"
+                      >
+                        <p className="text-sm text-gray-800">
+                          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
+                          <span className="font-semibold">{n.subject}</span> has been confirmed.
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {n.date} at {n.time}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
@@ -73,23 +155,31 @@ function NavBar() {
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
 
-                {user.role === "tutor" && (
-  <Link
-    href="/dashboard"
-    className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-gray-700"
-  >
-    <User size={16} />
-    My Profile
-  </Link>
-)}
-<button
-  onClick={handleLogout}
-  className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-red-600"
->
-  <LogOut size={16} />
-  Logout
-</button>
+                  <Link
+                    href="/bookings"
+                    className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-gray-700"
+                  >
+                    <Calendar size={16} />
+                    My Bookings
+                  </Link>
 
+                  {user.role === "tutor" && (
+                    <Link
+                      href="/dashboard"
+                      className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-gray-700"
+                    >
+                      <User size={16} />
+                      My Profile
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-red-600"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
                 </div>
               )}
             </div>

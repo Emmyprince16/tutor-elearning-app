@@ -29,12 +29,15 @@ model User {
 }
 
 model Booking {
-  id         Int      @id @default(autoincrement())
-  studentId  Int
-  tutorName  String
-  subject    String
-  date       String
-  time       String
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  studentName String
+  tutorId     Int
+  tutorName   String
+  subject     String
+  date        String
+  time        String
+  status      String   @default("pending")
+  notified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

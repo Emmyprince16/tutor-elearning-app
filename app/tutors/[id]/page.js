@@ -58,12 +58,14 @@ export default function TutorProfile({ params }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          studentId: user.id,
-          tutorName: `${tutor.firstName}, ${tutor.lastName}`,
-          subject: tutor.subject,
-          date,
-          time,
-        }),
+  studentId: user.id,
+  studentName: `${user.firstName}, ${user.lastName}`,
+  tutorId: tutor.id,
+  tutorName: `${tutor.firstName}, ${tutor.lastName}`,
+  subject: tutor.subject,
+  date,
+  time,
+}),
       });
 
       const data = await response.json();
