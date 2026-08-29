@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function PUT(request) {
   try {
-    const { id, bio, subject, option } = await request.json();
+    const { id, bio, subject, option, isAvailable } = await request.json();
 
     const updatedTutor = await prisma.user.update({
       where: { id: parseInt(id) },
-      data: { bio, subject, option },
+      data: { bio, subject, option, isAvailable },
     });
 
     const { password: _, ...tutorWithoutPassword } = updatedTutor;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { Star, ArrowLeft, Calendar, Clock, CheckCircle } from "lucide-react";
+import { Star, ArrowLeft, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function TutorProfile({ params }) {
@@ -58,14 +58,14 @@ export default function TutorProfile({ params }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  studentId: user.id,
-  studentName: `${user.firstName}, ${user.lastName}`,
-  tutorId: tutor.id,
-  tutorName: `${tutor.firstName}, ${tutor.lastName}`,
-  subject: tutor.subject,
-  date,
-  time,
-}),
+          studentId: user.id,
+          studentName: `${user.firstName}, ${user.lastName}`,
+          tutorId: tutor.id,
+          tutorName: `${tutor.firstName}, ${tutor.lastName}`,
+          subject: tutor.subject,
+          date,
+          time,
+        }),
       });
 
       const data = await response.json();
@@ -100,9 +100,16 @@ export default function TutorProfile({ params }) {
       </Link>
 
       <div className="bg-white rounded-lg shadow-md p-6 animate-fade-in-scale">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {tutor.firstName}, {tutor.lastName}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {tutor.firstName}, {tutor.lastName}
+          </h1>
+          {!tutor.isAvailable && (
+            <span className="text-xs font-medium bg-gray-200 text-gray-600 px-3 py-1 rounded-full">
+              Unavailable
+            </span>
+          )}
+        </div>
         <p className="text-gray-600 mt-1">{tutor.subject}</p>
         <p className="text-yellow-600 flex items-center gap-1 mt-2">
           <Star size={18} fill="currentColor" />
@@ -127,6 +134,22 @@ export default function TutorProfile({ params }) {
               className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
             >
               Join Video Session
+            </Link>
+          </div>
+        ) : !tutor.isAvailable ? (
+          <div className="flex flex-col items-center text-center gap-3 py-6">
+            <XCircle className="text-gray-400" size={40} />
+            <h2 className="text-lg font-semibold text-gray-800">
+              This tutor isn't taking bookings right now
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Check back later, or browse other available tutors.
+            </p>
+            <Link
+              href="/tutors"
+              className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+            >
+              Browse Other Tutors
             </Link>
           </div>
         ) : (

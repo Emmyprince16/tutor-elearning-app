@@ -15,6 +15,7 @@ export async function GET(request, { params }) {
         rating: true,
         bio: true,
         role: true,
+        isAvailable: true,
       },
     });
 

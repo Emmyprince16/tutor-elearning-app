@@ -12,6 +12,22 @@ export async function POST(request) {
       );
     }
 
+    // Check the tutor's current availability before creating the booking
+    const tutor = await prisma.user.findUnique({
+      where: { id: parseInt(tutorId) },
+    });
+
+    if (!tutor) {
+      return NextResponse.json({ error: "Tutor not found." }, { status: 404 });
+    }
+
+    if (!tutor.isAvailable) {
+      return NextResponse.json(
+        { error: "This tutor is currently unavailable for bookings." },
+        { status: 403 }
+      );
+    }
+
     const booking = await prisma.booking.create({
       data: {
         studentId: parseInt(studentId),

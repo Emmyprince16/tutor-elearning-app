@@ -8,6 +8,7 @@ export default function TutorDashboard() {
   const [bio, setBio] = useState("");
   const [subject, setSubject] = useState("");
   const [option, setOption] = useState("General");
+  const [isAvailable, setIsAvailable] = useState(true);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +22,9 @@ export default function TutorDashboard() {
       setBio(parsedUser.bio || "");
       setSubject(parsedUser.subject || "");
       setOption(parsedUser.option || "General");
+      setIsAvailable(
+        parsedUser.isAvailable !== undefined ? parsedUser.isAvailable : true
+      );
     }
   }, []);
 
@@ -33,7 +37,7 @@ export default function TutorDashboard() {
       const response = await fetch("/api/tutors/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, bio, subject, option }),
+        body: JSON.stringify({ id: user.id, bio, subject, option, isAvailable }),
       });
 
       const data = await response.json();
@@ -73,6 +77,30 @@ export default function TutorDashboard() {
           <p className="text-gray-900 font-medium">
             {user.firstName}, {user.lastName}
           </p>
+        </div>
+
+        <div className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Availability</p>
+            <p className="text-xs text-gray-500">
+              {isAvailable
+                ? "Students can currently book sessions with you."
+                : "You're marked unavailable — students can't book you."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAvailable(!isAvailable)}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+              isAvailable ? "bg-green-700" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                isAvailable ? "translate-x-6" : "translate-x-0"
+              }`}
+            />
+          </button>
         </div>
 
         <div>
