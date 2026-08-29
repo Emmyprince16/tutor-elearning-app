@@ -22,19 +22,28 @@ export default function TutorProfile({ params }) {
     }
   }, []);
 
-  async function handleBooking(e) {
-    e.preventDefault();
-    setError("");
+ async function handleBooking(e) {
+  e.preventDefault();
+  setError("");
 
-    if (!user) {
-      window.location.href = "/login";
-      return;
-    }
+  if (!user) {
+    window.location.href = "/login";
+    return;
+  }
 
-    if (!date || !time) {
-      setError("Please select both a date and time.");
-      return;
-    }
+  if (!date || !time) {
+    setError("Please select both a date and time.");
+    return;
+  }
+
+  const selectedDateTime = new Date(`${date}T${time}`);
+  const now = new Date();
+
+  if (selectedDateTime < now) {
+    setError("You can't book a session in the past. Please choose a future date and time.");
+    return;
+  }
+
 
     try {
       const response = await fetch("/api/bookings", {
@@ -121,17 +130,17 @@ export default function TutorProfile({ params }) {
             </div>
 
             <div className="relative">
-              <Clock
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
-              />
-            </div>
+  <Clock
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+    size={18}
+  />
+  <input
+    type="time"
+    value={time}
+    onChange={(e) => setTime(e.target.value)}
+    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+  />
+</div>
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
 
