@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, role } = await request.json();
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -26,6 +26,15 @@ export async function POST(request) {
       );
     }
 
+    if (user.role !== role) {
+      return NextResponse.json(
+        {
+          error: `This account is registered as a ${user.role}. Please select "${user.role === "tutor" ? "Tutor" : "Student"}" and try again.`,
+        },
+        { status: 400 }
+      );
+    }
+    
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
