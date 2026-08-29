@@ -1,8 +1,9 @@
 "use client";
 
+import { GraduationCap, Menu, X, ChevronDown, LogOut, User } from "lucide-react";
+import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { GraduationCap, Menu, X, ChevronDown, LogOut } from "lucide-react";
 
 function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -71,13 +72,24 @@ function NavBar() {
                     <p className="font-medium">{user.firstName} {user.lastName}</p>
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-red-600"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
+
+                {user.role === "tutor" && (
+  <Link
+    href="/dashboard"
+    className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-gray-700"
+  >
+    <User size={16} />
+    My Profile
+  </Link>
+)}
+<button
+  onClick={handleLogout}
+  className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-50 text-red-600"
+>
+  <LogOut size={16} />
+  Logout
+</button>
+
                 </div>
               )}
             </div>
