@@ -14,6 +14,7 @@ export default function TutorProfile({ params }) {
   const [time, setTime] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -75,6 +76,7 @@ export default function TutorProfile({ params }) {
         return;
       }
 
+      setCreatedBooking(data.booking);
       setSuccess(true);
     } catch (err) {
       setError("Network error. Please try again.");
@@ -130,7 +132,7 @@ export default function TutorProfile({ params }) {
               Your session with {tutor.firstName} on {date} at {time} has been requested.
             </p>
             <Link
-              href={`/session/tutor${tutor.id}-${date}-${time}`.replace(/[: ]/g, "")}
+              href={`/session/${createdBooking?.roomId}`}
               className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
             >
               Join Video Session

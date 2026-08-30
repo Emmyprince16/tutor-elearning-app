@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 export async function POST(request) {
   try {
@@ -12,7 +13,6 @@ export async function POST(request) {
       );
     }
 
-    // Check the tutor's current availability before creating the booking
     const tutor = await prisma.user.findUnique({
       where: { id: parseInt(tutorId) },
     });
@@ -37,6 +37,7 @@ export async function POST(request) {
         subject,
         date,
         time,
+        roomId: randomUUID(),
       },
     });
 

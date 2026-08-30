@@ -133,12 +133,12 @@ export default function MyBookingsPage() {
                 </a>
 
                 <Link
-                  href={`/session/tutor${booking.tutorId}-${booking.date}-${booking.time}`.replace(/[: ,]/g, "")}
-                  className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
-                >
-                  <Video size={16} />
-                  Join Session
-                </Link>
+  href={`/session/${booking.roomId}`}
+  className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+>
+  <Video size={16} />
+  Join Session
+</Link>
               </div>
             </div>
           ))}

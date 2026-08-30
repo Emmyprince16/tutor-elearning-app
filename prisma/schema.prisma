@@ -39,5 +39,6 @@ model Booking {
   time        String
   status      String   @default("pending")
   notified    Boolean  @default(false)
+  roomId      String?  @unique
   createdAt   DateTime @default(now())
 }
