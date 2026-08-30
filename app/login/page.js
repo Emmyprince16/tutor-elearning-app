@@ -68,7 +68,7 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
       }
 
       localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
+window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
     } catch (error) {
       setErrors({ form: "Network error. Please try again." });
     } finally {
