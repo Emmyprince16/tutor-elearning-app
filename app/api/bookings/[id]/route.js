@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 
 const ALLOWED_STATUSES = ["pending", "confirmed", "cancelled"];
 
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 export async function PATCH(request, { params }) {
   try {
     const { id } = await params;
@@ -34,9 +38,16 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    const updateData = { status };
+
+    // Generate a session code the first time a booking is confirmed
+    if (status === "confirmed" && !booking.sessionCode) {
+      updateData.sessionCode = generateCode();
+    }
+
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
-      data: { status },
+      data: updateData,
     });
 
     return NextResponse.json(updatedBooking, { status: 200 });
