@@ -41,6 +41,7 @@ model Booking {
   notified    Boolean  @default(false)
   roomId      String?  @unique
   sessionCode String?
+  rescheduled Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 

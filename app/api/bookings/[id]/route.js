@@ -17,11 +17,7 @@ export async function PATCH(request, { params }) {
     }
 
     const body = await request.json();
-    const { status, tutorId } = body;
-
-    if (!ALLOWED_STATUSES.includes(status)) {
-      return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
-    }
+    const { status, tutorId, date, time } = body;
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
@@ -38,11 +34,29 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const updateData = { status };
+    const updateData = {};
 
-    // Generate a session code the first time a booking is confirmed
-    if (status === "confirmed" && !booking.sessionCode) {
-      updateData.sessionCode = generateCode();
+    // Handle a reschedule: tutor supplies a new date/time and flips status back to pending
+    if (date && time) {
+      updateData.date = date;
+      updateData.time = time;
+      updateData.status = "pending";
+      updateData.rescheduled = true;
+      updateData.notified = false;
+    } else {
+      // Normal status change (confirm / reject)
+      if (!ALLOWED_STATUSES.includes(status)) {
+        return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
+      }
+      updateData.status = status;
+
+      if (status === "confirmed" && !booking.sessionCode) {
+        updateData.sessionCode = generateCode();
+      }
+
+      if (status === "cancelled") {
+        updateData.notified = false;
+      }
     }
 
     const updatedBooking = await prisma.booking.update({

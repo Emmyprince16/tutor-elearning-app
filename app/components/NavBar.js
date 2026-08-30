@@ -128,20 +128,36 @@ function NavBar() {
                       No new notifications.
                     </p>
                   ) : (
-                    notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50"
-                      >
-                        <p className="text-sm text-gray-800">
-                          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
-                          <span className="font-semibold">{n.subject}</span> has been confirmed.
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {n.date} at {n.time}
-                        </p>
-                      </div>
-                    ))
+notifications.map((n) => (
+  <div
+    key={n.id}
+    className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50"
+  >
+    <p className="text-sm text-gray-800">
+      {n.status === "confirmed" && (
+        <>
+          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
+          <span className="font-semibold">{n.subject}</span> has been confirmed.
+        </>
+      )}
+      {n.status === "cancelled" && (
+        <>
+          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
+          <span className="font-semibold">{n.subject}</span> was cancelled by the tutor.
+        </>
+      )}
+      {n.status === "pending" && n.rescheduled && (
+        <>
+          <span className="font-semibold">{n.tutorName}</span> proposed a new time for your{" "}
+          <span className="font-semibold">{n.subject}</span> session.
+        </>
+      )}
+    </p>
+    <p className="text-xs text-gray-500 mt-1">
+      {n.date} at {n.time}
+    </p>
+  </div>
+))
                   )}
                 </div>
               )}

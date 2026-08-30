@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Video, User, CheckCircle, X, Copy, Lock, KeyRound } from "lucide-react";
+import { Calendar, Clock, Video, User, CheckCircle, X, Copy, Lock, KeyRound, XCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -16,6 +16,13 @@ export default function MyBookingsPage() {
   const [joiningBooking, setJoiningBooking] = useState(null);
   const [codeInput, setCodeInput] = useState("");
   const [joinError, setJoinError] = useState("");
+
+  const [rejectingId, setRejectingId] = useState(null);
+
+  const [reschedulingBooking, setReschedulingBooking] = useState(null);
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [reschedulingLoading, setReschedulingLoading] = useState(false);
 
   const router = useRouter();
 
@@ -76,6 +83,75 @@ export default function MyBookingsPage() {
     }
   };
 
+  const handleReject = async (bookingId) => {
+    if (!confirm("Are you sure you want to reject this booking?")) return;
+
+    setRejectingId(bookingId);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "cancelled", tutorId: user.id }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to reject booking.");
+        return;
+      }
+
+      const updated = await res.json();
+      setBookings((prev) =>
+        prev.map((b) => (b.id === updated.id ? updated : b))
+      );
+    } catch (err) {
+      console.error("Error rejecting booking:", err);
+      alert("Something went wrong rejecting the booking.");
+    } finally {
+      setRejectingId(null);
+    }
+  };
+
+  function handleOpenReschedule(booking) {
+    setReschedulingBooking(booking);
+    setNewDate(booking.date);
+    setNewTime(booking.time);
+  }
+
+  async function handleSubmitReschedule(e) {
+    e.preventDefault();
+    setReschedulingLoading(true);
+
+    try {
+      const res = await fetch(`/api/bookings/${reschedulingBooking.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tutorId: user.id,
+          date: newDate,
+          time: newTime,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to reschedule booking.");
+        return;
+      }
+
+      const updated = await res.json();
+      setBookings((prev) =>
+        prev.map((b) => (b.id === updated.id ? updated : b))
+      );
+      setReschedulingBooking(null);
+    } catch (err) {
+      console.error("Error rescheduling booking:", err);
+      alert("Something went wrong rescheduling the booking.");
+    } finally {
+      setReschedulingLoading(false);
+    }
+  }
+
   function handleCopyCode() {
     if (!confirmedCode) return;
     navigator.clipboard.writeText(confirmedCode);
@@ -86,7 +162,6 @@ export default function MyBookingsPage() {
     const sessionTime = new Date(`${booking.date}T${booking.time}`);
     const now = new Date();
     const diffMinutes = (sessionTime - now) / (1000 * 60);
-    // Unlocks 15 minutes before, stays unlocked afterward (no upper cutoff)
     return diffMinutes <= 15;
   }
 
@@ -130,6 +205,7 @@ export default function MyBookingsPage() {
         <div className="flex flex-col gap-4">
           {bookings.map((booking) => {
             const isConfirmed = booking.status === "confirmed";
+            const isCancelled = booking.status === "cancelled";
             const canJoin = isConfirmed && isJoinTimeNear(booking);
 
             return (
@@ -162,70 +238,99 @@ export default function MyBookingsPage() {
 
                 <div className="flex flex-col sm:flex-row gap-2">
                   {user.role === "tutor" && booking.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => handleConfirm(booking.id)}
+                        disabled={confirmingId === booking.id}
+                        className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded font-medium hover:bg-yellow-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                      >
+                        <CheckCircle size={16} />
+                        {confirmingId === booking.id ? "Confirming..." : "Confirm"}
+                      </button>
+
+                      <button
+                        onClick={() => handleReject(booking.id)}
+                        disabled={rejectingId === booking.id}
+                        className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                      >
+                        <XCircle size={16} />
+                        {rejectingId === booking.id ? "Rejecting..." : "Reject"}
+                      </button>
+                    </>
+                  )}
+
+                  {user.role === "tutor" && isCancelled && (
                     <button
-                      onClick={() => handleConfirm(booking.id)}
-                      disabled={confirmingId === booking.id}
-                      className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded font-medium hover:bg-yellow-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                      onClick={() => handleOpenReschedule(booking)}
+                      className="flex items-center justify-center gap-2 bg-blue-700 text-white px-4 py-2 rounded font-medium hover:bg-blue-800 hover:scale-105 transition-all duration-200"
                     >
-                      <CheckCircle size={16} />
-                      {confirmingId === booking.id ? "Confirming..." : "Confirm"}
+                      <RefreshCw size={16} />
+                      Reschedule
                     </button>
                   )}
 
                   {user.role === "tutor" ? (
                     <>
-                      
-                      <a  href={`/api/bookings/${booking.id}/ics`}
-                        className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
-                      >
-                        <Calendar size={16} />
-                        Add to Calendar
-                      </a>
-
-                      <Link
-                        href={`/session/${booking.roomId}`}
-                        className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
-                      >
-                        <Video size={16} />
-                        Join Session
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      {isConfirmed ? (
+                      {!isCancelled && (
                         
-                         <a href={`/api/bookings/${booking.id}/ics`}
+                        <a  href={`/api/bookings/${booking.id}/ics`}
                           className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
                         >
                           <Calendar size={16} />
                           Add to Calendar
                         </a>
-                      ) : (
-                        <button
-                          disabled
-                          className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
-                        >
-                          <Lock size={16} />
-                          Add to Calendar
-                        </button>
                       )}
 
-                      {canJoin ? (
-                        <button
-                          onClick={() => handleOpenJoinModal(booking)}
+                      {!isCancelled && (
+                        <Link
+                          href={`/session/${booking.roomId}`}
                           className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
                         >
                           <Video size={16} />
                           Join Session
-                        </button>
-                      ) : (
-                        <button
-                          disabled
-                          className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
-                        >
-                          <Lock size={16} />
-                          {isConfirmed ? "Available soon" : "Join Session"}
-                        </button>
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {!isCancelled && (
+                        <>
+                          {isConfirmed ? (
+                            
+                            <a  href={`/api/bookings/${booking.id}/ics`}
+                              className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+                            >
+                              <Calendar size={16} />
+                              Add to Calendar
+                            </a>
+                          ) : (
+                            <button
+                              disabled
+                              className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
+                            >
+                              <Lock size={16} />
+                              Add to Calendar
+                            </button>
+                          )}
+
+                          {canJoin ? (
+                            <button
+                              onClick={() => handleOpenJoinModal(booking)}
+                              className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+                            >
+                              <Video size={16} />
+                              Join Session
+                            </button>
+                          ) : (
+                            <button
+                              disabled
+                              className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
+                            >
+                              <Lock size={16} />
+                              {isConfirmed ? "Available soon" : "Join Session"}
+                            </button>
+                          )}
+                        </>
                       )}
                     </>
                   )}
@@ -304,6 +409,52 @@ export default function MyBookingsPage() {
                 className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
               >
                 Join Session
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {reschedulingBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full relative">
+            <button
+              onClick={() => setReschedulingBooking(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
+
+            <RefreshCw className="mx-auto text-blue-700 mb-3" size={32} />
+            <h2 className="text-lg font-bold text-gray-900 mb-2 text-center">
+              Propose a New Time
+            </h2>
+            <p className="text-gray-500 text-sm mb-4 text-center">
+              This will notify {reschedulingBooking.studentName} of the new date and time.
+            </p>
+
+            <form onSubmit={handleSubmitReschedule} className="flex flex-col gap-3">
+              <input
+                type="date"
+                value={newDate}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700"
+              />
+
+              <input
+                type="time"
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700"
+              />
+
+              <button
+                type="submit"
+                disabled={reschedulingLoading}
+                className="bg-blue-700 text-white py-2 rounded-lg font-medium hover:bg-blue-800 hover:scale-105 transition-all duration-200 disabled:opacity-60"
+              >
+                {reschedulingLoading ? "Sending..." : "Send New Time"}
               </button>
             </form>
           </div>

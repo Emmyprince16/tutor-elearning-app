@@ -13,13 +13,18 @@ export async function GET(request) {
     const notifications = await prisma.booking.findMany({
       where: {
         studentId: parseInt(studentId, 10),
-        status: "confirmed",
         notified: false,
+        status: { in: ["confirmed", "cancelled", "pending"] },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ notifications }, { status: 200 });
+    // Only include "pending" ones here if they were caused by a reschedule
+    const filtered = notifications.filter(
+      (b) => b.status !== "pending" || b.rescheduled
+    );
+
+    return NextResponse.json({ notifications: filtered }, { status: 200 });
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return NextResponse.json(
@@ -40,7 +45,6 @@ export async function PATCH(request) {
     await prisma.booking.updateMany({
       where: {
         studentId: parseInt(studentId, 10),
-        status: "confirmed",
         notified: false,
       },
       data: { notified: true },
