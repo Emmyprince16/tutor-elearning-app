@@ -61,15 +61,20 @@ function NavBar() {
   }
 
   function handleNotifToggle() {
-    const opening = !notifOpen;
-    setNotifOpen(opening);
+    setNotifOpen(!notifOpen);
+  }
 
-    if (opening && notifications.length > 0) {
-      fetch("/api/notifications", {
+  async function handleMarkOneRead(bookingId) {
+    try {
+      await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId: user.id }),
-      }).catch((err) => console.error("Error marking notifications read:", err));
+        body: JSON.stringify({ bookingId, studentId: user.id }),
+      });
+
+      setNotifications((prev) => prev.filter((n) => n.id !== bookingId));
+    } catch (err) {
+      console.error("Error marking notification read:", err);
     }
   }
 
@@ -88,7 +93,7 @@ function NavBar() {
 
         <div className="hidden md:flex gap-6 font-medium items-center">
           
-           <a href={user && user.role === "tutor" ? "/tutor-home" : "/"}
+          <a  href={user && user.role === "tutor" ? "/tutor-home" : "/"}
             className="hover:text-yellow-400 transition-colors"
           >
             Home
@@ -118,7 +123,7 @@ function NavBar() {
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white text-gray-900 rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto">
+                <div className="absolute right-0 mt-2 w-72 bg-white text-gray-900 rounded-lg shadow-lg overflow-hidden max-h-96 overflow-y-auto">
                   <div className="px-4 py-3 border-b border-gray-100 font-medium">
                     Notifications
                   </div>
@@ -128,36 +133,37 @@ function NavBar() {
                       No new notifications.
                     </p>
                   ) : (
-notifications.map((n) => (
-  <div
-    key={n.id}
-    className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50"
-  >
-    <p className="text-sm text-gray-800">
-      {n.status === "confirmed" && (
-        <>
-          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
-          <span className="font-semibold">{n.subject}</span> has been confirmed.
-        </>
-      )}
-      {n.status === "cancelled" && (
-        <>
-          Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
-          <span className="font-semibold">{n.subject}</span> was cancelled by the tutor.
-        </>
-      )}
-      {n.status === "pending" && n.rescheduled && (
-        <>
-          <span className="font-semibold">{n.tutorName}</span> proposed a new time for your{" "}
-          <span className="font-semibold">{n.subject}</span> session.
-        </>
-      )}
-    </p>
-    <p className="text-xs text-gray-500 mt-1">
-      {n.date} at {n.time}
-    </p>
-  </div>
-))
+                    notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => handleMarkOneRead(n.id)}
+                        className="w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50"
+                      >
+                        <p className="text-sm text-gray-800">
+                          {n.status === "confirmed" && (
+                            <>
+                              Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
+                              <span className="font-semibold">{n.subject}</span> has been confirmed.
+                            </>
+                          )}
+                          {n.status === "cancelled" && (
+                            <>
+                              Your booking with <span className="font-semibold">{n.tutorName}</span> for{" "}
+                              <span className="font-semibold">{n.subject}</span> was cancelled by the tutor.
+                            </>
+                          )}
+                          {n.status === "pending" && n.rescheduled && (
+                            <>
+                              <span className="font-semibold">{n.tutorName}</span> proposed a new time for your{" "}
+                              <span className="font-semibold">{n.subject}</span> session.
+                            </>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {n.date} at {n.time}
+                        </p>
+                      </button>
+                    ))
                   )}
                 </div>
               )}

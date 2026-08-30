@@ -237,15 +237,26 @@ export default function MyBookingsPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  {user.role === "tutor" && isConfirmed && (
-  <button
-    onClick={() => handleReject(booking.id)}
-    disabled={rejectingId === booking.id}
-    className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
-  >
-    <XCircle size={16} />
-    {rejectingId === booking.id ? "Cancelling..." : "Cancel"}
-  </button>
+                  {user.role === "tutor" && booking.status === "pending" && (
+  <>
+    <button
+      onClick={() => handleConfirm(booking.id)}
+      disabled={confirmingId === booking.id}
+      className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded font-medium hover:bg-yellow-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+    >
+      <CheckCircle size={16} />
+      {confirmingId === booking.id ? "Confirming..." : "Confirm"}
+    </button>
+
+    <button
+      onClick={() => handleReject(booking.id)}
+      disabled={rejectingId === booking.id}
+      className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+    >
+      <XCircle size={16} />
+      {rejectingId === booking.id ? "Rejecting..." : "Reject"}
+    </button>
+  </>
 )}
 
                   {user.role === "tutor" && isCancelled && (

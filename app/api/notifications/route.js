@@ -17,9 +17,9 @@ export async function GET(request) {
         status: { in: ["confirmed", "cancelled", "pending"] },
       },
       orderBy: { createdAt: "desc" },
+      take: 10,
     });
 
-    // Only include "pending" ones here if they were caused by a reschedule
     const filtered = notifications.filter(
       (b) => b.status !== "pending" || b.rescheduled
     );
@@ -36,25 +36,36 @@ export async function GET(request) {
 
 export async function PATCH(request) {
   try {
-    const { studentId } = await request.json();
+    const { bookingId, studentId } = await request.json();
 
-    if (!studentId) {
-      return NextResponse.json({ error: "studentId is required" }, { status: 400 });
+    if (!bookingId || !studentId) {
+      return NextResponse.json(
+        { error: "bookingId and studentId are required" },
+        { status: 400 }
+      );
     }
 
-    await prisma.booking.updateMany({
-      where: {
-        studentId: parseInt(studentId, 10),
-        notified: false,
-      },
+    const booking = await prisma.booking.findUnique({
+      where: { id: parseInt(bookingId, 10) },
+    });
+
+    if (!booking || booking.studentId !== parseInt(studentId, 10)) {
+      return NextResponse.json(
+        { error: "Notification not found or not yours" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.booking.update({
+      where: { id: parseInt(bookingId, 10) },
       data: { notified: true },
     });
 
-    return NextResponse.json({ message: "Notifications marked as read" }, { status: 200 });
+    return NextResponse.json({ message: "Notification marked as read" }, { status: 200 });
   } catch (error) {
-    console.error("Error marking notifications read:", error);
+    console.error("Error marking notification read:", error);
     return NextResponse.json(
-      { error: "Failed to update notifications." },
+      { error: "Failed to update notification." },
       { status: 500 }
     );
   }
