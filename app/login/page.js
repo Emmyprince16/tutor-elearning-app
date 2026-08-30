@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X } from "lucide-react";
+import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X, IdCard, BookOpen } from "lucide-react";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,7 +13,18 @@ export default function LoginPage() {
   const [middleName, setMiddleName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [matricNumber, setMatricNumber] = useState("");
+  const [level, setLevel] = useState("100");
+  const [studyMode, setStudyMode] = useState("Full time");
+  const [option, setOption] = useState("AI");
+
   const [errors, setErrors] = useState({});
+
+  const levels = ["100", "200", "300", "400"];
+  const options = ["AI", "NCC", "Cybersecurity", "SWD"];
+  const showStudyMode = level === "100" || level === "200";
+const showOption = level === "300" || level === "400";
 
   function validate() {
     const newErrors = {};
@@ -34,7 +45,14 @@ if (!passwordRegex.test(password)) {
       if (!lastName.trim()) newErrors.lastName = "Last name is required";
       if (!firstName.trim()) newErrors.firstName = "First name is required";
       if (!middleName.trim()) newErrors.middleName = "Middle name is required";
-    }
+
+      if (role === "student") {
+  const matricRegex = /^\d{10}$/;
+  if (!matricRegex.test(matricNumber.trim())) {
+    newErrors.matricNumber = "Matric number must be exactly 10 digits";
+  }
+      }
+ }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -88,6 +106,12 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
         email,
         password,
         role,
+       ...(role === "student" && {
+  matricNumber,
+  level,
+  studyMode: showStudyMode ? studyMode : null,
+  option: showOption ? option : null,
+}),
       }),
     });
 
@@ -105,6 +129,10 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
     setLastName("");
     setEmail("");
     setPassword("");
+    setMatricNumber("");
+    setLevel("100");
+    setStudyMode("Full time");
+    setOption("AI");
   } catch (error) {
     setErrors({ form: "Network error. Please try again." });
   } finally {
@@ -223,6 +251,102 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
                     </p>
                   )}
                 </div>
+
+                {role === "student" && (
+                  <>
+                    <div>
+                      <div className="relative">
+                        <IdCard
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                          size={18}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Matric Number"
+                          value={matricNumber}
+                          onChange={(e) => setMatricNumber(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                        />
+                      </div>
+                      {errors.matricNumber && (
+                        <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                          <AlertCircle size={14} /> {errors.matricNumber}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className={showOption ? "grid grid-cols-2 gap-3" : ""}>
+  <div>
+    <label className="text-sm font-medium text-gray-700 mb-1 block">
+      Level
+    </label>
+    <select
+      value={level}
+      onChange={(e) => setLevel(e.target.value)}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+    >
+      {levels.map((lvl) => (
+        <option key={lvl} value={lvl}>
+          {lvl} Level
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {showOption && (
+    <div>
+      <label className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-1">
+        <BookOpen size={14} /> Option
+      </label>
+      <select
+        value={option}
+        onChange={(e) => setOption(e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+      >
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
+</div>
+
+
+                    {showStudyMode && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                          Study Mode
+                        </label>
+                        <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => setStudyMode("Full time")}
+                            className={`flex-1 py-2 font-medium transition-colors ${
+                              studyMode === "Full time"
+                                ? "bg-green-800 text-white"
+                                : "bg-white text-gray-700"
+                            }`}
+                          >
+                            Full time
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setStudyMode("Part time")}
+                            className={`flex-1 py-2 font-medium transition-colors ${
+                              studyMode === "Part time"
+                                ? "bg-green-800 text-white"
+                                : "bg-white text-gray-700"
+                            }`}
+                          >
+                            Part time
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </>
             )}
 
