@@ -42,3 +42,12 @@ model Booking {
   roomId      String?  @unique
   createdAt   DateTime @default(now())
 }
+
+model QuickSession {
+  id        Int      @id @default(autoincrement())
+  tutorId   Int
+  tutorName String
+  code      String   @unique
+  roomId    String   @unique
+  createdAt DateTime @default(now())
+}

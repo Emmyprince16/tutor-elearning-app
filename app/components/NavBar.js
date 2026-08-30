@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell } from "lucide-react";
+import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -87,13 +87,21 @@ function NavBar() {
         </div>
 
         <div className="hidden md:flex gap-6 font-medium items-center">
-          <a href={user && user.role === "tutor" ? "/tutor-home" : "/"}
-  className="hover:text-yellow-400 transition-colors"
->
-  Home
-</a>
+          
+           <a href={user && user.role === "tutor" ? "/tutor-home" : "/"}
+            className="hover:text-yellow-400 transition-colors"
+          >
+            Home
+          </a>
           <a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
           <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+
+          {user && user.role === "student" && (
+            <Link href="/join" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
+              <KeyRound size={16} />
+              Join
+            </Link>
+          )}
 
           {user && user.role === "student" && (
             <div className="relative" ref={notifRef}>
@@ -200,13 +208,18 @@ function NavBar() {
       {menuOpen && (
         <div className="md:hidden flex flex-col gap-3 px-4 pb-4 font-medium bg-green-900">
           
-<a href={user && user.role === "tutor" ? "/tutor-home" : "/"}
-  className="hover:text-yellow-400 transition-colors"
->
-  Home
-</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Tutors</a>
-          <a href="#" className="hover:text-yellow-400 transition-colors">Departments</a>
+           <a href={user && user.role === "tutor" ? "/tutor-home" : "/"}
+            className="hover:text-yellow-400 transition-colors"
+          >
+            Home
+          </a>
+          <a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
+          <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+          {user && user.role === "student" && (
+            <Link href="/join" className="hover:text-yellow-400 transition-colors">
+              Join a Session
+            </Link>
+          )}
           {user ? (
             <div className="flex items-center gap-3">
               <span>Hi, {user.firstName}</span>
