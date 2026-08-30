@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { Star, ArrowLeft, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Star, ArrowLeft, Calendar, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function TutorProfile({ params }) {
@@ -91,6 +91,8 @@ export default function TutorProfile({ params }) {
     return <p className="p-6">Tutor not found.</p>;
   }
 
+  const isTutorViewingTutor = user && user.role === "tutor";
+
   return (
     <div className="max-w-2xl mx-auto p-6 animate-fade-in">
       <Link
@@ -124,7 +126,23 @@ export default function TutorProfile({ params }) {
 
         <hr className="my-6" />
 
-        {success ? (
+        {isTutorViewingTutor ? (
+          <div className="flex flex-col items-center text-center gap-3 py-6">
+            <MessageCircle className="text-green-800" size={40} />
+            <h2 className="text-lg font-semibold text-gray-800">
+              Get in touch with {tutor.firstName}
+            </h2>
+            <p className="text-gray-500 text-sm">
+              You can message fellow tutors directly instead of booking a session.
+            </p>
+            <button
+              disabled
+              className="mt-2 bg-green-800 text-white px-5 py-2 rounded font-medium opacity-60 cursor-not-allowed"
+            >
+              Message (coming soon)
+            </button>
+          </div>
+        ) : success ? (
           <div className="flex flex-col items-center text-center gap-3 py-6">
             <CheckCircle className="text-green-700" size={40} />
             <h2 className="text-xl font-bold text-gray-900">Session Booked!</h2>

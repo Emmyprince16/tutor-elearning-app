@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell, KeyRound } from "lucide-react";
+import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell, KeyRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -99,7 +99,9 @@ function NavBar() {
             Home
           </a>
           <a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
-          <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+          {user && user.role !== "tutor" && (
+  <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+)}
 
           {user && user.role === "student" && (
             <Link href="/join" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
@@ -107,6 +109,13 @@ function NavBar() {
               Join
             </Link>
           )}
+
+          {user && user.role === "tutor" && (
+  <Link href="/students" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
+    <Users size={16} />
+    Students
+  </Link>
+)}
 
           {user && user.role === "student" && (
             <div className="relative" ref={notifRef}>
@@ -236,7 +245,9 @@ function NavBar() {
             Home
           </a>
           <a href="/tutors" className="hover:text-yellow-400 transition-colors">Tutors</a>
-          <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+          {user && user.role !== "tutor" && (
+  <a href="/departments" className="hover:text-yellow-400 transition-colors">Departments</a>
+)}
           {user && user.role === "student" && (
             <Link href="/join" className="hover:text-yellow-400 transition-colors">
               Join a Session
