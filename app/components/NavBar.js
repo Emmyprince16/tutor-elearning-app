@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell, KeyRound, Users } from "lucide-react";
+import { GraduationCap, Menu, X, ChevronDown, LogOut, User, Calendar, Bell, KeyRound, Users, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -114,6 +114,13 @@ function NavBar() {
   <Link href="/students" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
     <Users size={16} />
     Students
+  </Link>
+)}
+
+{user && user.role === "tutor" && (
+  <Link href="/messages" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
+    <MessageCircle size={16} />
+    Messages
   </Link>
 )}
 
