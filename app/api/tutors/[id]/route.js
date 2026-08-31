@@ -23,7 +23,20 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Tutor not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ tutor }, { status: 200 });
+    const reviews = await prisma.review.findMany({
+      where: { tutorId: tutor.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : tutor.rating;
+
+    return NextResponse.json(
+      { tutor: { ...tutor, rating: averageRating, reviewCount: reviews.length }, reviews },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(

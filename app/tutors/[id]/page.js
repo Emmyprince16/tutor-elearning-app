@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { Star, ArrowLeft, Calendar, Clock, CheckCircle, XCircle, MessageCircle, User } from "lucide-react";
+import { Star, ArrowLeft, Calendar, Clock, CheckCircle, XCircle, MessageCircle, User, Edit3 } from "lucide-react";
 import Link from "next/link";
 
 export default function TutorProfile({ params }) {
   const resolvedParams = use(params);
   const [tutor, setTutor] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loadingTutor, setLoadingTutor] = useState(true);
 
   const [user, setUser] = useState(null);
@@ -15,6 +16,14 @@ export default function TutorProfile({ params }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [createdBooking, setCreatedBooking] = useState(null);
+
+  const [canReview, setCanReview] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -28,9 +37,18 @@ export default function TutorProfile({ params }) {
       .then((res) => res.json())
       .then((data) => {
         setTutor(data.tutor || null);
+        setReviews(data.reviews || []);
         setLoadingTutor(false);
       });
   }, [resolvedParams.id]);
+
+  useEffect(() => {
+    if (!user || user.role !== "student") return;
+
+    fetch(`/api/reviews/can-review?studentId=${user.id}&tutorId=${resolvedParams.id}`)
+      .then((res) => res.json())
+      .then((data) => setCanReview(data.canReview));
+  }, [user, resolvedParams.id]);
 
   async function handleBooking(e) {
     e.preventDefault();
@@ -83,6 +101,42 @@ export default function TutorProfile({ params }) {
     }
   }
 
+  async function handleSubmitReview(e) {
+    e.preventDefault();
+    setSubmittingReview(true);
+    setReviewError("");
+
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: user.id,
+          studentName: `${user.firstName}, ${user.lastName}`,
+          tutorId: tutor.id,
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setReviewError(data.error);
+        return;
+      }
+
+      setReviews((prev) => [data.review, ...prev]);
+      setReviewSubmitted(true);
+      setCanReview(false);
+      setShowReviewForm(false);
+    } catch (err) {
+      setReviewError("Network error. Please try again.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
+
   if (loadingTutor) {
     return <p className="p-6">Loading tutor profile...</p>;
   }
@@ -105,7 +159,6 @@ export default function TutorProfile({ params }) {
       </Link>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in-scale">
-        {/* Header strip — ties into the site's gradient identity */}
         <div className="bg-gradient-to-r from-green-900 to-green-800 px-6 py-5">
           <div className="flex items-center justify-between">
             <h1
@@ -123,7 +176,12 @@ export default function TutorProfile({ params }) {
           <p className="text-green-100 mt-1">{tutor.subject}</p>
           <p className="text-yellow-400 flex items-center gap-1 mt-2">
             <Star size={16} fill="currentColor" />
-            {tutor.rating}
+            {tutor.rating?.toFixed(1)}
+            {tutor.reviewCount > 0 && (
+              <span className="text-green-200 text-sm font-normal">
+                ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? "s" : ""})
+              </span>
+            )}
           </p>
         </div>
 
@@ -143,7 +201,6 @@ export default function TutorProfile({ params }) {
                   <User size={40} />
                 </div>
               </div>
-
               <div>
                 <h2
                   className="text-xl font-bold text-gray-900"
@@ -156,15 +213,12 @@ export default function TutorProfile({ params }) {
                   your dashboard to update your bio, subject, or availability.
                 </p>
               </div>
-
               <Link
                 href="/dashboard"
                 className="group mt-2 inline-flex items-center gap-2 bg-gradient-to-r from-green-700 to-green-900 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300"
               >
                 Go to My Dashboard
-                <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
+                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
             </div>
           ) : isTutorViewingTutor ? (
@@ -223,10 +277,7 @@ export default function TutorProfile({ params }) {
               <h2 className="font-semibold text-gray-900">Book a Session</h2>
 
               <div className="relative">
-                <Calendar
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="date"
                   value={date}
@@ -237,10 +288,7 @@ export default function TutorProfile({ params }) {
               </div>
 
               <div className="relative">
-                <Clock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="time"
                   value={time}
@@ -258,6 +306,117 @@ export default function TutorProfile({ params }) {
                 {user ? "Book a Session" : "Log in to Book"}
               </button>
             </form>
+          )}
+
+          {/* Reviews section — visible regardless of which state above is shown */}
+          {!isOwnProfile && !isTutorViewingTutor && (
+            <>
+              <hr className="my-6" />
+
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Star size={18} className="text-yellow-500" />
+                  Reviews {reviews.length > 0 && `(${reviews.length})`}
+                </h2>
+
+                {canReview && !showReviewForm && !reviewSubmitted && (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="text-sm text-green-800 font-medium flex items-center gap-1 link-sweep"
+                  >
+                    <Edit3 size={14} />
+                    Leave a Review
+                  </button>
+                )}
+              </div>
+
+              {showReviewForm && (
+                <form onSubmit={handleSubmitReview} className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 flex flex-col gap-3 animate-fade-in-scale">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Your Rating</p>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setReviewRating(star)}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <Star
+                            size={26}
+                            className={star <= reviewRating ? "text-yellow-500" : "text-gray-300"}
+                            fill={star <= reviewRating ? "currentColor" : "none"}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Share your experience with this tutor (optional)..."
+                    rows={3}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
+                  />
+
+                  {reviewError && <p className="text-red-600 text-sm">{reviewError}</p>}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={submittingReview}
+                      className="bg-green-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200 disabled:opacity-60"
+                    >
+                      {submittingReview ? "Submitting..." : "Submit Review"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewForm(false)}
+                      className="text-gray-500 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {reviewSubmitted && (
+                <p className="text-green-700 text-sm mb-4 flex items-center gap-1 animate-fade-in">
+                  <CheckCircle size={16} /> Thanks for your review!
+                </p>
+              )}
+
+              {reviews.length === 0 ? (
+                <p className="text-gray-400 text-sm">No reviews yet.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {reviews.map((r, index) => (
+                    <div
+                      key={r.id}
+                      className={`border border-gray-100 rounded-lg p-3 animate-stagger animate-stagger-${Math.min(index + 1, 6)}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-gray-900 text-sm">{r.studentName}</p>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={14}
+                              className={star <= r.rating ? "text-yellow-500" : "text-gray-200"}
+                              fill={star <= r.rating ? "currentColor" : "none"}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {r.comment && (
+                        <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

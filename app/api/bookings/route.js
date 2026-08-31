@@ -28,6 +28,23 @@ export async function POST(request) {
       );
     }
 
+    // Prevent double-booking: block if the tutor already has a CONFIRMED session at this exact date+time
+    const conflict = await prisma.booking.findFirst({
+      where: {
+        tutorId: parseInt(tutorId),
+        date,
+        time,
+        status: "confirmed",
+      },
+    });
+
+    if (conflict) {
+      return NextResponse.json(
+        { error: "This tutor already has a confirmed session at that date and time. Please choose another slot." },
+        { status: 409 }
+      );
+    }
+
     const booking = await prisma.booking.create({
       data: {
         studentId: parseInt(studentId),

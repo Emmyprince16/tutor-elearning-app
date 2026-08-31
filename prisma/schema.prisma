@@ -67,3 +67,15 @@ model Message {
   read         Boolean  @default(false)
   createdAt    DateTime @default(now())
 }
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  studentName String
+  tutorId     Int
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  @@unique([studentId, tutorId])
+}
