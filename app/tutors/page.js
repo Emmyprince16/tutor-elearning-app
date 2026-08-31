@@ -29,7 +29,15 @@ export default function TutorsPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">All Tutors</h1>
+      <h1
+        className="text-2xl font-bold mb-1 text-gray-900"
+        style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+      >
+        All Tutors
+      </h1>
+      <p className="text-gray-500 mb-6 text-sm">
+        Browse verified tutors across every specialization.
+      </p>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
@@ -42,14 +50,14 @@ export default function TutorsPage() {
             placeholder="Search by name or subject..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
           />
         </div>
 
         <select
           value={selectedOption}
           onChange={(e) => setSelectedOption(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+          className="border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
         >
           {options.map((opt) => (
             <option key={opt} value={opt} className="text-gray-900">
@@ -63,14 +71,15 @@ export default function TutorsPage() {
         <p className="text-gray-500">No tutors match your search.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTutors.map((tutor) => (
-            <TutorCard
-              key={tutor.id}
-              id={tutor.id}
-              name={`${tutor.firstName}, ${tutor.lastName}`}
-              subject={tutor.subject}
-              rating={tutor.rating}
-            />
+          {filteredTutors.map((tutor, index) => (
+            <div key={tutor.id} className={`animate-stagger animate-stagger-${Math.min(index + 1, 6)}`}>
+              <TutorCard
+                id={tutor.id}
+                name={`${tutor.firstName}, ${tutor.lastName}`}
+                subject={tutor.subject}
+                rating={tutor.rating}
+              />
+            </div>
           ))}
         </div>
       )}

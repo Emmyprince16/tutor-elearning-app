@@ -18,7 +18,7 @@ function TutorCard(props) {
   }, [props.id]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 card-lift">
+    <div className="bg-white rounded-xl shadow-md p-4 card-lift">
       {isSelf ? (
         <h2 className="text-xl font-bold text-gray-900">{props.name}</h2>
       ) : (
@@ -28,20 +28,20 @@ function TutorCard(props) {
           </h2>
         </Link>
       )}
-      <p className="text-gray-600">Subject: {props.subject}</p>
-      <p className="text-yellow-600 flex items-center gap-1">
+      <p className="text-gray-600 text-sm mt-1">Subject: {props.subject}</p>
+      <p className="text-yellow-600 flex items-center gap-1 mt-1">
         <Star size={16} fill="currentColor" />
         {props.rating}
       </p>
 
       {isSelf ? (
-        <span className="mt-3 inline-flex items-center gap-2 bg-gray-200 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed">
+        <span className="mt-3 inline-flex items-center gap-2 bg-gray-100 text-gray-400 px-4 py-2 rounded-lg font-medium cursor-not-allowed">
           This is you
         </span>
       ) : (
         <Link
           href={`/tutors/${props.id}`}
-          className="mt-3 inline-flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200 text-center"
+          className="mt-3 inline-flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200 text-center"
         >
           {isTutor ? (
             <>
