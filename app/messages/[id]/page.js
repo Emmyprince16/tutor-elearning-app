@@ -40,7 +40,6 @@ export default function MessageThreadPage({ params }) {
 
     fetchMessages();
 
-    // Mark as read when opening the thread
     fetch("/api/messages/mark-read", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -97,66 +96,74 @@ export default function MessageThreadPage({ params }) {
     <div className="max-w-2xl mx-auto p-6 flex flex-col h-[85vh]">
       <Link
         href="/messages"
-        className="inline-flex items-center gap-1 text-green-800 mb-4 hover:underline"
+        className="inline-flex items-center gap-1 text-green-800 mb-4 link-sweep"
       >
         <ArrowLeft size={18} />
         Back to Messages
       </Link>
 
-      <h1 className="text-xl font-bold text-gray-900 mb-4">{otherName}</h1>
+      <div className="bg-gradient-to-r from-green-900 to-green-800 rounded-xl px-5 py-4 mb-4 flex items-center gap-3 shadow-md">
+        <div className="w-10 h-10 rounded-full bg-white/15 text-white font-bold flex items-center justify-center">
+          {otherName.charAt(0).toUpperCase()}
+        </div>
+        <h1
+          className="text-lg font-bold text-white"
+          style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+        >
+          {otherName}
+        </h1>
+      </div>
 
-      <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-md p-4 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto bg-white rounded-xl shadow-md p-4 flex flex-col gap-3">
         {messages.length === 0 ? (
-          <p className="text-gray-400 text-center mt-8">
-            No messages yet. Say hello!
-          </p>
+          <div className="flex flex-col items-center text-center gap-2 mt-12">
+            <p className="text-gray-400">No messages yet. Say hello!</p>
+          </div>
         ) : (
           messages.map((m) => {
-  const isMine = m.senderId === user.id;
-  const initial = (isMine ? user.firstName : otherName).charAt(0).toUpperCase();
+            const isMine = m.senderId === user.id;
+            const initial = (isMine ? user.firstName : otherName).charAt(0).toUpperCase();
 
-  return (
-    <div
-      key={m.id}
-      className={`flex items-end gap-2 max-w-[80%] ${
-        isMine ? "self-end flex-row-reverse" : "self-start"
-      }`}
-    >
-      <div
-        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-          isMine ? "bg-green-800 text-white" : "bg-gray-300 text-gray-700"
-        }`}
-      >
-        {initial}
-      </div>
-      <div
-        className={`px-4 py-2 rounded-lg ${
-          isMine
-            ? "bg-green-800 text-white"
-            : "bg-gray-100 text-gray-900"
-        }`}
-      >
-        <p className="text-sm">{m.content}</p>
-      </div>
-    </div>
-  );
-})
+            return (
+              <div
+                key={m.id}
+                className={`flex items-end gap-2 max-w-[80%] animate-fade-in ${
+                  isMine ? "self-end flex-row-reverse" : "self-start"
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                    isMine ? "bg-green-800 text-white" : "bg-gray-300 text-gray-700"
+                  }`}
+                >
+                  {initial}
+                </div>
+                <div
+                  className={`px-4 py-2 rounded-lg ${
+                    isMine ? "bg-green-800 text-white" : "bg-gray-100 text-gray-900"
+                  }`}
+                >
+                  <p className="text-sm">{m.content}</p>
+                </div>
+              </div>
+            );
+          })
         )}
         <div ref={bottomRef}></div>
       </div>
 
       <form onSubmit={handleSend} className="flex gap-2 mt-4">
         <input
-  type="text"
-  value={newMessage}
-  onChange={(e) => setNewMessage(e.target.value)}
-  placeholder="Type a message..."
-  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
-/>
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type a message..."
+          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
+        />
         <button
           type="submit"
           disabled={sending}
-          className="bg-green-800 text-white px-4 py-2 rounded-lg hover:bg-green-900 transition-colors disabled:opacity-60"
+          className="bg-green-800 text-white px-4 py-2.5 rounded-lg hover:bg-green-900 hover:scale-[1.02] transition-all duration-200 disabled:opacity-60"
         >
           <Send size={18} />
         </button>

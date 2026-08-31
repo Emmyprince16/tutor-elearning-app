@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageCircle, User } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function MessagesInboxPage() {
@@ -49,23 +49,34 @@ export default function MessagesInboxPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+      <h1
+        className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2"
+        style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+      >
         <MessageCircle size={24} />
         Messages
       </h1>
       <p className="text-gray-600 mb-6">Conversations with fellow tutors.</p>
 
       {conversations.length === 0 ? (
-        <p className="text-gray-500">
-          No conversations yet. Visit a tutor's profile to start one.
-        </p>
+        <div className="flex flex-col items-center text-center gap-3 py-16 animate-fade-in-scale">
+          <div className="relative">
+            <div className="absolute inset-0 bg-green-200 rounded-full blur-xl opacity-40 animate-glow-pulse"></div>
+            <div className="relative bg-gradient-to-br from-green-700 to-green-900 text-white rounded-full p-4 shadow-lg">
+              <MessageCircle size={28} />
+            </div>
+          </div>
+          <p className="text-gray-500 max-w-xs">
+            No conversations yet. Visit a tutor's profile to start one.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {conversations.map((c) => (
+          {conversations.map((c, index) => (
             <Link
               key={c.otherId}
               href={`/messages/${c.otherId}?name=${encodeURIComponent(c.otherName)}`}
-              className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between gap-3 hover:shadow-lg transition-shadow"
+              className={`bg-white rounded-xl shadow-md p-4 flex items-center justify-between gap-3 card-lift animate-stagger animate-stagger-${Math.min(index + 1, 6)}`}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-green-800 text-white font-bold flex items-center justify-center">
