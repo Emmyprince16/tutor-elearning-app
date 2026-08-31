@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X, IdCard, BookOpen } from "lucide-react";
+import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X, IdCard, BookOpen, Code, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,7 +24,7 @@ export default function LoginPage() {
   const levels = ["100", "200", "300", "400"];
   const options = ["AI", "NCC", "Cybersecurity", "SWD"];
   const showStudyMode = level === "100" || level === "200";
-const showOption = level === "300" || level === "400";
+  const showOption = level === "300" || level === "400";
 
   function validate() {
     const newErrors = {};
@@ -35,11 +35,11 @@ const showOption = level === "300" || level === "400";
     }
 
     const passwordRegex =
-  /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
-if (!passwordRegex.test(password)) {
-  newErrors.password =
-    "Password must be 8-20 characters, with at least 1 capital letter, 1 number, and 1 symbol";
-}
+      /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
+    if (!passwordRegex.test(password)) {
+      newErrors.password =
+        "Password must be 8-20 characters, with at least 1 capital letter, 1 number, and 1 symbol";
+    }
 
     if (!isLogin) {
       if (!lastName.trim()) newErrors.lastName = "Last name is required";
@@ -47,36 +47,73 @@ if (!passwordRegex.test(password)) {
       if (!middleName.trim()) newErrors.middleName = "Middle name is required";
 
       if (role === "student") {
-  const matricRegex = /^\d{10}$/;
-  if (!matricRegex.test(matricNumber.trim())) {
-    newErrors.matricNumber = "Matric number must be exactly 10 digits";
-  }
+        const matricRegex = /^\d{10}$/;
+        if (!matricRegex.test(matricNumber.trim())) {
+          newErrors.matricNumber = "Matric number must be exactly 10 digits";
+        }
       }
- }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
   const hasLength = password.length >= 8 && password.length <= 20;
-const hasCapital = /[A-Z]/.test(password);
-const hasNumber = /[0-9]/.test(password);
-const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const hasCapital = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
- async function handleSubmit(e) {
-  e.preventDefault();
-  const isValid = validate();
-  if (!isValid) return;
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const isValid = validate();
+    if (!isValid) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  if (isLogin) {
+    if (isLogin) {
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, role }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setErrors({ form: data.error });
+          return;
+        }
+
+        localStorage.setItem("user", JSON.stringify(data.user));
+        window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
+      } catch (error) {
+        setErrors({ form: "Network error. Please try again." });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     try {
-     const response = await fetch("/api/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, password, role }),
-});
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          middleName,
+          lastName,
+          email,
+          password,
+          role,
+          ...(role === "student" && {
+            matricNumber,
+            level,
+            studyMode: showStudyMode ? studyMode : null,
+            option: showOption ? option : null,
+          }),
+        }),
+      });
 
       const data = await response.json();
 
@@ -85,90 +122,100 @@ const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(data.user));
-window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
+      alert("Account created successfully! You can now log in.");
+      setIsLogin(true);
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
+      setEmail("");
+      setPassword("");
+      setMatricNumber("");
+      setLevel("100");
+      setStudyMode("Full time");
+      setOption("AI");
     } catch (error) {
       setErrors({ form: "Network error. Please try again." });
     } finally {
       setLoading(false);
     }
-    return;
   }
-
-  try {
-    const response = await fetch("/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName,
-        middleName,
-        lastName,
-        email,
-        password,
-        role,
-       ...(role === "student" && {
-  matricNumber,
-  level,
-  studyMode: showStudyMode ? studyMode : null,
-  option: showOption ? option : null,
-}),
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setErrors({ form: data.error });
-      return;
-    }
-
-    alert("Account created successfully! You can now log in.");
-    setIsLogin(true);
-    setFirstName("");
-    setMiddleName("");
-    setLastName("");
-    setEmail("");
-    setPassword("");
-    setMatricNumber("");
-    setLevel("100");
-    setStudyMode("Full time");
-    setOption("AI");
-  } catch (error) {
-    setErrors({ form: "Network error. Please try again." });
-  } finally {
-    setLoading(false);
-  }
-}
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="bg-white rounded-lg shadow-md w-full max-w-3xl flex flex-col md:flex-row overflow-hidden">
-        <div
-          className="hidden md:block md:w-1/2 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80')",
-          }}
-        ></div>
-        <div className="w-full md:w-1/2 p-8">
-          <div className="flex justify-center mb-4">
-            <GraduationCap size={36} className="text-green-800" />
-          </div>
-          <h1 className="text-2xl font-bold text-center text-gray-900 mb-1">
-            {isLogin ? "Welcome Back" : "Create an Account"}
+    <div className="min-h-[85vh] flex items-center justify-center bg-gray-50 px-4 py-10">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden animate-fade-in-scale">
+
+        {/* Signature moment: animated academic scene */}
+        {/* Signature moment: two circles meeting — student and tutor connecting */}
+<div className="hidden md:flex md:w-2/5 bg-gradient-to-br from-green-900 via-green-800 to-green-950 relative overflow-hidden flex-col justify-between p-8">
+  <div className="absolute inset-0 opacity-[0.07]">
+    <div className="absolute inset-0" style={{
+      backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+      backgroundSize: "22px 22px",
+    }}></div>
+  </div>
+
+  {/* Floating academic/CS motifs at different depths */}
+  <div className="absolute top-16 left-8 text-green-400/30 animate-float" style={{ animationDuration: "5s" }}>
+    <Code size={28} strokeWidth={1.5} />
+  </div>
+  <div className="absolute top-24 right-10 text-yellow-400/25 animate-float" style={{ animationDuration: "6.5s", animationDelay: "0.5s" }}>
+    <BookOpen size={32} strokeWidth={1.5} />
+  </div>
+  <div className="absolute bottom-32 right-8 text-green-300/25 animate-float" style={{ animationDuration: "4.5s", animationDelay: "1s" }}>
+    <Sparkles size={22} strokeWidth={1.5} />
+  </div>
+
+  <div className="relative z-10">
+    <p className="text-green-200 text-sm font-medium tracking-wide">
+      FPI Computer Sciences
+    </p>
+  </div>
+
+  {/* Two overlapping circles meeting at the center — tutor & student */}
+  <div className="relative z-10 flex items-center justify-center py-4">
+    <div className="relative w-44 h-32 flex items-center justify-center">
+      <div className="absolute left-0 w-28 h-28 rounded-full bg-yellow-400/15 border border-yellow-400/30 backdrop-blur-sm animate-float" style={{ animationDuration: "5s" }}></div>
+      <div className="absolute right-0 w-28 h-28 rounded-full bg-green-400/15 border border-green-300/30 backdrop-blur-sm animate-float" style={{ animationDuration: "5.5s", animationDelay: "0.3s" }}></div>
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute bg-white/10 rounded-full blur-xl w-20 h-20 animate-glow-pulse"></div>
+        <GraduationCap size={40} className="relative text-yellow-300" strokeWidth={1.4} />
+      </div>
+    </div>
+  </div>
+
+  <div className="relative z-10">
+    <p className="text-white text-lg leading-snug" style={{ fontFamily: "var(--font-heading), Georgia, serif" }}>
+      Where students and tutors meet, learn, and grow together.
+    </p>
+  </div>
+</div>
+
+        <div className="w-full md:w-3/5 p-8 sm:p-10">
+          <h1
+            className="text-2xl font-bold text-gray-900 mb-1"
+            style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+          >
+            {isLogin ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="text-center text-gray-500 mb-6">
-            FPI Computer Sciences E-Learning Portal
+          <p className="text-gray-500 mb-6 text-sm">
+            {isLogin
+              ? "Log in to continue your learning journey."
+              : "Join the department's tutoring platform."}
           </p>
 
-          <div className="flex mb-6 border border-gray-300 rounded-lg overflow-hidden">
+          <div className="relative flex mb-6 bg-gray-100 rounded-lg p-1">
+            <div
+              className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-green-800 rounded-md shadow-sm transition-transform duration-300 ease-out"
+              style={{
+                transform: role === "tutor" ? "translateX(calc(100% + 8px))" : "translateX(0)",
+              }}
+            ></div>
             <button
               type="button"
               onClick={() => setRole("student")}
-              className={`flex-1 py-2 font-medium transition-colors ${
-                role === "student"
-                  ? "bg-green-800 text-white"
-                  : "bg-white text-gray-700"
+              className={`relative flex-1 py-2 font-medium transition-colors duration-300 z-10 ${
+                role === "student" ? "text-white" : "text-gray-600"
               }`}
             >
               Student
@@ -176,10 +223,8 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
             <button
               type="button"
               onClick={() => setRole("tutor")}
-              className={`flex-1 py-2 font-medium transition-colors ${
-                role === "tutor"
-                  ? "bg-green-800 text-white"
-                  : "bg-white text-gray-700"
+              className={`relative flex-1 py-2 font-medium transition-colors duration-300 z-10 ${
+                role === "tutor" ? "text-white" : "text-gray-600"
               }`}
             >
               Tutor
@@ -191,16 +236,13 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
               <>
                 <div>
                   <div className="relative">
-                    <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={18}
-                    />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="text"
                       placeholder="Last Name (Surname)"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                     />
                   </div>
                   {errors.lastName && (
@@ -212,16 +254,13 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
 
                 <div>
                   <div className="relative">
-                    <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={18}
-                    />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="text"
                       placeholder="First Name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                     />
                   </div>
                   {errors.firstName && (
@@ -233,16 +272,13 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
 
                 <div>
                   <div className="relative">
-                    <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={18}
-                    />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                       type="text"
                       placeholder="Middle Name"
                       value={middleName}
                       onChange={(e) => setMiddleName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                     />
                   </div>
                   {errors.middleName && (
@@ -256,16 +292,13 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
                   <>
                     <div>
                       <div className="relative">
-                        <IdCard
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                          size={18}
-                        />
+                        <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
                           type="text"
                           placeholder="Matric Number"
                           value={matricNumber}
                           onChange={(e) => setMatricNumber(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                         />
                       </div>
                       {errors.matricNumber && (
@@ -276,43 +309,42 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
                     </div>
 
                     <div className={showOption ? "grid grid-cols-2 gap-3" : ""}>
-  <div>
-    <label className="text-sm font-medium text-gray-700 mb-1 block">
-      Level
-    </label>
-    <select
-      value={level}
-      onChange={(e) => setLevel(e.target.value)}
-      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
-    >
-      {levels.map((lvl) => (
-        <option key={lvl} value={lvl}>
-          {lvl} Level
-        </option>
-      ))}
-    </select>
-  </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                          Level
+                        </label>
+                        <select
+                          value={level}
+                          onChange={(e) => setLevel(e.target.value)}
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                        >
+                          {levels.map((lvl) => (
+                            <option key={lvl} value={lvl}>
+                              {lvl} Level
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-  {showOption && (
-    <div>
-      <label className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-1">
-        <BookOpen size={14} /> Option
-      </label>
-      <select
-        value={option}
-        onChange={(e) => setOption(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
-      >
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  )}
-</div>
-
+                      {showOption && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-1 block flex items-center gap-1">
+                            <BookOpen size={14} /> Option
+                          </label>
+                          <select
+                            value={option}
+                            onChange={(e) => setOption(e.target.value)}
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+                          >
+                            {options.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
 
                     {showStudyMode && (
                       <div>
@@ -323,10 +355,8 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
                           <button
                             type="button"
                             onClick={() => setStudyMode("Full time")}
-                            className={`flex-1 py-2 font-medium transition-colors ${
-                              studyMode === "Full time"
-                                ? "bg-green-800 text-white"
-                                : "bg-white text-gray-700"
+                            className={`flex-1 py-2 font-medium transition-colors duration-300 ${
+                              studyMode === "Full time" ? "bg-green-800 text-white" : "bg-white text-gray-700"
                             }`}
                           >
                             Full time
@@ -334,10 +364,8 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
                           <button
                             type="button"
                             onClick={() => setStudyMode("Part time")}
-                            className={`flex-1 py-2 font-medium transition-colors ${
-                              studyMode === "Part time"
-                                ? "bg-green-800 text-white"
-                                : "bg-white text-gray-700"
+                            className={`flex-1 py-2 font-medium transition-colors duration-300 ${
+                              studyMode === "Part time" ? "bg-green-800 text-white" : "bg-white text-gray-700"
                             }`}
                           >
                             Part time
@@ -352,16 +380,13 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
 
             <div>
               <div className="relative">
-                <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="email"
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                 />
               </div>
               {errors.email && (
@@ -371,40 +396,37 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
               )}
             </div>
 
-                       <div>
+            <div>
               <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="password"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
                 />
               </div>
 
               {!isLogin && password.length > 0 && (
-               <ul className="mt-2 text-sm flex flex-col gap-1">
-  <li className={`flex items-center gap-1 ${hasLength ? "text-green-700" : "text-gray-400"}`}>
-    {hasLength ? <Check size={14} /> : <X size={14} />}
-    8- 20 characters
-  </li>
-  <li className={`flex items-center gap-1 ${hasCapital ? "text-green-700" : "text-gray-400"}`}>
-    {hasCapital ? <Check size={14} /> : <X size={14} />}
-    At least one capital letter
-  </li>
-  <li className={`flex items-center gap-1 ${hasNumber ? "text-green-700" : "text-gray-400"}`}>
-    {hasNumber ? <Check size={14} /> : <X size={14} />}
-    At least one number
-  </li>
-  <li className={`flex items-center gap-1 ${hasSymbol ? "text-green-700" : "text-gray-400"}`}>
-    {hasSymbol ? <Check size={14} /> : <X size={14} />}
-    At least one symbol
-  </li>
-</ul>
+                <ul className="mt-2 text-sm flex flex-col gap-1">
+                  <li className={`flex items-center gap-1 transition-colors ${hasLength ? "text-green-700" : "text-gray-400"}`}>
+                    {hasLength ? <Check size={14} /> : <X size={14} />}
+                    8-20 characters
+                  </li>
+                  <li className={`flex items-center gap-1 transition-colors ${hasCapital ? "text-green-700" : "text-gray-400"}`}>
+                    {hasCapital ? <Check size={14} /> : <X size={14} />}
+                    At least one capital letter
+                  </li>
+                  <li className={`flex items-center gap-1 transition-colors ${hasNumber ? "text-green-700" : "text-gray-400"}`}>
+                    {hasNumber ? <Check size={14} /> : <X size={14} />}
+                    At least one number
+                  </li>
+                  <li className={`flex items-center gap-1 transition-colors ${hasSymbol ? "text-green-700" : "text-gray-400"}`}>
+                    {hasSymbol ? <Check size={14} /> : <X size={14} />}
+                    At least one symbol
+                  </li>
+                </ul>
               )}
 
               {errors.password && (
@@ -414,22 +436,21 @@ window.location.href = data.user.role === "tutor" ? "/tutor-home" : "/";
               )}
             </div>
 
-                        <button
-  type="submit"
-  disabled={loading}
-  className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200 disabled:opacity-60"
->
-  {loading ? "Please wait..." : isLogin ? "Log In" : "Sign Up"}
-</button>
-{errors.form && (
-  <p className="text-red-600 text-sm text-center flex items-center justify-center gap-1">
-    <AlertCircle size={14} /> {errors.form}
-  </p>
-)}
-
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-green-800 text-white py-2.5 rounded-lg font-medium hover:bg-green-900 transition-all duration-200 disabled:opacity-60 shadow-sm hover:shadow-md"
+            >
+              {loading ? "Please wait..." : isLogin ? "Log In" : "Sign Up"}
+            </button>
+            {errors.form && (
+              <p className="text-red-600 text-sm text-center flex items-center justify-center gap-1">
+                <AlertCircle size={14} /> {errors.form}
+              </p>
+            )}
           </form>
 
-          <p className="text-center text-gray-500 mt-6">
+          <p className="text-center text-gray-500 mt-6 text-sm">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               onClick={() => {
