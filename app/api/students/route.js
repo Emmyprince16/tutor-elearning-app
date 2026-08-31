@@ -5,11 +5,15 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const option = searchParams.get("option");
+    const level = searchParams.get("level");
+    const studyMode = searchParams.get("studyMode");
 
     const students = await prisma.user.findMany({
       where: {
         role: "student",
         ...(option && { option }),
+        ...(level && { level }),
+        ...(studyMode && { studyMode }),
       },
       select: {
         id: true,
