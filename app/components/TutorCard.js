@@ -18,7 +18,7 @@ function TutorCard(props) {
   }, [props.id]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow animate-fade-in">
+    <div className="bg-white rounded-lg shadow-md p-4 card-lift">
       {isSelf ? (
         <h2 className="text-xl font-bold text-gray-900">{props.name}</h2>
       ) : (
