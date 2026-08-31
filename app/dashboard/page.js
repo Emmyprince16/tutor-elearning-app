@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, BookOpen, Tag, FileText, CheckCircle } from "lucide-react";
+import { User, BookOpen, Tag, FileText, CheckCircle, Star } from "lucide-react";
 
 export default function TutorDashboard() {
   const [user, setUser] = useState(null);
@@ -64,12 +64,41 @@ export default function TutorDashboard() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">Your Tutor Profile</h1>
+      <h1
+        className="text-2xl font-bold mb-1 text-gray-900"
+        style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+      >
+        Your Tutor Profile
+      </h1>
       <p className="text-gray-600 mb-6">
         This is what students will see when they view your profile.
       </p>
 
-      <form onSubmit={handleSave} className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4">
+      {/* Live preview strip — mirrors the gradient header on /tutors/[id] */}
+      <div className="bg-gradient-to-r from-green-900 to-green-800 rounded-xl px-6 py-5 mb-6 shadow-md animate-fade-in-scale">
+        <div className="flex items-center justify-between">
+          <h2
+            className="text-xl font-bold text-white"
+            style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+          >
+            {user.firstName}, {user.lastName}
+          </h2>
+          <span
+            className={`text-xs font-medium px-3 py-1 rounded-full ${
+              isAvailable ? "bg-green-400/20 text-green-200" : "bg-white/15 text-white"
+            }`}
+          >
+            {isAvailable ? "Available" : "Unavailable"}
+          </span>
+        </div>
+        <p className="text-green-100 mt-1">{subject || "No subject set yet"}</p>
+        <p className="text-yellow-400 flex items-center gap-1 mt-2 text-sm">
+          <Star size={14} fill="currentColor" />
+          {user.rating}
+        </p>
+      </div>
+
+      <form onSubmit={handleSave} className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-4 card-lift">
         <div>
           <label className="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">
             <User size={16} /> Name
@@ -91,12 +120,12 @@ export default function TutorDashboard() {
           <button
             type="button"
             onClick={() => setIsAvailable(!isAvailable)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
               isAvailable ? "bg-green-700" : "bg-gray-300"
             }`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${
                 isAvailable ? "translate-x-6" : "translate-x-0"
               }`}
             />
@@ -112,7 +141,7 @@ export default function TutorDashboard() {
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. Machine Learning & AI"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
           />
         </div>
 
@@ -123,7 +152,7 @@ export default function TutorDashboard() {
           <select
             value={option}
             onChange={(e) => setOption(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
           >
             {options.map((opt) => (
               <option key={opt} value={opt} className="text-gray-900">
@@ -142,12 +171,12 @@ export default function TutorDashboard() {
             onChange={(e) => setBio(e.target.value)}
             placeholder="Tell students a bit about your background and teaching style..."
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition-shadow"
           />
         </div>
 
         {saved && (
-          <p className="text-green-700 text-sm flex items-center gap-1">
+          <p className="text-green-700 text-sm flex items-center gap-1 animate-fade-in">
             <CheckCircle size={16} /> Profile updated successfully!
           </p>
         )}
@@ -155,7 +184,7 @@ export default function TutorDashboard() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200 disabled:opacity-60"
+          className="bg-green-800 text-white py-2.5 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200 disabled:opacity-60"
         >
           {loading ? "Saving..." : "Save Profile"}
         </button>
