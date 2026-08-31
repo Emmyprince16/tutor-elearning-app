@@ -197,13 +197,18 @@ export default function MyBookingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">My Bookings</h1>
+      <h1
+        className="text-2xl font-bold mb-6 text-gray-900"
+        style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+      >
+        My Bookings
+      </h1>
 
       {bookings.length === 0 ? (
         <p className="text-gray-500">You have no bookings yet.</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {bookings.map((booking) => {
+          {bookings.map((booking, index) => {
             const isConfirmed = booking.status === "confirmed";
             const isCancelled = booking.status === "cancelled";
             const canJoin = isConfirmed && isJoinTimeNear(booking);
@@ -211,7 +216,7 @@ export default function MyBookingsPage() {
             return (
               <div
                 key={booking.id}
-                className="bg-white rounded-lg shadow-md p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                className={`bg-white rounded-xl shadow-md p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 card-lift animate-stagger animate-stagger-${Math.min(index + 1, 6)}`}
               >
                 <div>
                   <p className="font-semibold text-gray-900 flex items-center gap-2">
@@ -228,7 +233,7 @@ export default function MyBookingsPage() {
                     </span>
                   </div>
                   <span
-                    className={`inline-block mt-2 text-xs font-medium px-2 py-1 rounded-full ${
+                    className={`inline-block mt-2 text-xs font-medium px-2.5 py-1 rounded-full ${
                       statusStyles[booking.status] || "bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -238,31 +243,42 @@ export default function MyBookingsPage() {
 
                 <div className="flex flex-col sm:flex-row gap-2">
                   {user.role === "tutor" && booking.status === "pending" && (
-  <>
-    <button
-      onClick={() => handleConfirm(booking.id)}
-      disabled={confirmingId === booking.id}
-      className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded font-medium hover:bg-yellow-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
-    >
-      <CheckCircle size={16} />
-      {confirmingId === booking.id ? "Confirming..." : "Confirm"}
-    </button>
+                    <>
+                      <button
+                        onClick={() => handleConfirm(booking.id)}
+                        disabled={confirmingId === booking.id}
+                        className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-yellow-700 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                      >
+                        <CheckCircle size={16} />
+                        {confirmingId === booking.id ? "Confirming..." : "Confirm"}
+                      </button>
 
-    <button
-      onClick={() => handleReject(booking.id)}
-      disabled={rejectingId === booking.id}
-      className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
-    >
-      <XCircle size={16} />
-      {rejectingId === booking.id ? "Rejecting..." : "Reject"}
-    </button>
-  </>
-)}
+                      <button
+                        onClick={() => handleReject(booking.id)}
+                        disabled={rejectingId === booking.id}
+                        className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                      >
+                        <XCircle size={16} />
+                        {rejectingId === booking.id ? "Rejecting..." : "Reject"}
+                      </button>
+                    </>
+                  )}
+
+                  {user.role === "tutor" && isConfirmed && (
+                    <button
+                      onClick={() => handleReject(booking.id)}
+                      disabled={rejectingId === booking.id}
+                      className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                      <XCircle size={16} />
+                      {rejectingId === booking.id ? "Cancelling..." : "Cancel"}
+                    </button>
+                  )}
 
                   {user.role === "tutor" && isCancelled && (
                     <button
                       onClick={() => handleOpenReschedule(booking)}
-                      className="flex items-center justify-center gap-2 bg-blue-700 text-white px-4 py-2 rounded font-medium hover:bg-blue-800 hover:scale-105 transition-all duration-200"
+                      className="flex items-center justify-center gap-2 bg-blue-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-800 hover:scale-[1.02] transition-all duration-200"
                     >
                       <RefreshCw size={16} />
                       Reschedule
@@ -274,7 +290,7 @@ export default function MyBookingsPage() {
                       {!isCancelled && (
                         
                         <a  href={`/api/bookings/${booking.id}/ics`}
-                          className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+                          className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 hover:scale-[1.02] transition-all duration-200"
                         >
                           <Calendar size={16} />
                           Add to Calendar
@@ -284,7 +300,7 @@ export default function MyBookingsPage() {
                       {!isCancelled && (
                         <Link
                           href={`/session/${booking.roomId}`}
-                          className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+                          className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200"
                         >
                           <Video size={16} />
                           Join Session
@@ -298,7 +314,7 @@ export default function MyBookingsPage() {
                           {isConfirmed ? (
                             
                             <a  href={`/api/bookings/${booking.id}/ics`}
-                              className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded font-medium hover:bg-gray-800 hover:scale-105 transition-all duration-200"
+                              className="flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 hover:scale-[1.02] transition-all duration-200"
                             >
                               <Calendar size={16} />
                               Add to Calendar
@@ -306,7 +322,7 @@ export default function MyBookingsPage() {
                           ) : (
                             <button
                               disabled
-                              className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
+                              className="flex items-center justify-center gap-2 bg-gray-200 text-gray-400 px-4 py-2 rounded-lg font-medium cursor-not-allowed"
                             >
                               <Lock size={16} />
                               Add to Calendar
@@ -316,7 +332,7 @@ export default function MyBookingsPage() {
                           {canJoin ? (
                             <button
                               onClick={() => handleOpenJoinModal(booking)}
-                              className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+                              className="flex items-center justify-center gap-2 bg-green-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200"
                             >
                               <Video size={16} />
                               Join Session
@@ -324,7 +340,7 @@ export default function MyBookingsPage() {
                           ) : (
                             <button
                               disabled
-                              className="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded font-medium cursor-not-allowed"
+                              className="flex items-center justify-center gap-2 bg-gray-200 text-gray-400 px-4 py-2 rounded-lg font-medium cursor-not-allowed"
                             >
                               <Lock size={16} />
                               {isConfirmed ? "Available soon" : "Join Session"}
@@ -343,7 +359,7 @@ export default function MyBookingsPage() {
 
       {confirmedCode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full relative">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full relative animate-fade-in-scale">
             <button
               onClick={() => setConfirmedCode(null)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -351,14 +367,17 @@ export default function MyBookingsPage() {
               <X size={20} />
             </button>
 
-            <h2 className="text-lg font-bold text-gray-900 mb-2">
+            <h2
+              className="text-lg font-bold text-gray-900 mb-2"
+              style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+            >
               Booking Confirmed
             </h2>
             <p className="text-gray-500 text-sm mb-4">
               Share this code with your student — they'll need it to join the session.
             </p>
 
-            <div className="flex items-center justify-center gap-2 bg-gray-100 rounded-lg py-4 mb-4">
+            <div className="flex items-center justify-center gap-2 bg-gray-50 border border-gray-200 rounded-lg py-5 mb-4">
               <span className="text-3xl font-bold tracking-widest text-gray-900">
                 {confirmedCode}
               </span>
@@ -366,7 +385,7 @@ export default function MyBookingsPage() {
 
             <button
               onClick={handleCopyCode}
-              className="w-full flex items-center justify-center gap-2 bg-gray-700 text-white py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-gray-700 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
             >
               <Copy size={16} />
               {copied ? "Copied!" : "Copy Code"}
@@ -377,7 +396,7 @@ export default function MyBookingsPage() {
 
       {joiningBooking && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full relative">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full relative animate-fade-in-scale">
             <button
               onClick={() => setJoiningBooking(null)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -386,7 +405,10 @@ export default function MyBookingsPage() {
             </button>
 
             <KeyRound className="mx-auto text-green-800 mb-3" size={32} />
-            <h2 className="text-lg font-bold text-gray-900 mb-2 text-center">
+            <h2
+              className="text-lg font-bold text-gray-900 mb-2 text-center"
+              style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+            >
               Enter Session Code
             </h2>
             <p className="text-gray-500 text-sm mb-4 text-center">
@@ -399,14 +421,14 @@ export default function MyBookingsPage() {
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
                 placeholder="e.g. 482913"
-                className="w-full text-center text-xl tracking-widest px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700"
+                className="w-full text-center text-xl tracking-widest px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
               />
 
               {joinError && <p className="text-red-600 text-sm text-center">{joinError}</p>}
 
               <button
                 type="submit"
-                className="bg-green-800 text-white py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-105 transition-all duration-200"
+                className="bg-green-800 text-white py-2.5 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200"
               >
                 Join Session
               </button>
@@ -417,7 +439,7 @@ export default function MyBookingsPage() {
 
       {reschedulingBooking && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full relative">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full relative animate-fade-in-scale">
             <button
               onClick={() => setReschedulingBooking(null)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -426,7 +448,10 @@ export default function MyBookingsPage() {
             </button>
 
             <RefreshCw className="mx-auto text-blue-700 mb-3" size={32} />
-            <h2 className="text-lg font-bold text-gray-900 mb-2 text-center">
+            <h2
+              className="text-lg font-bold text-gray-900 mb-2 text-center"
+              style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+            >
               Propose a New Time
             </h2>
             <p className="text-gray-500 text-sm mb-4 text-center">
@@ -439,20 +464,20 @@ export default function MyBookingsPage() {
                 value={newDate}
                 min={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-700"
               />
 
               <input
                 type="time"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-700"
               />
 
               <button
                 type="submit"
                 disabled={reschedulingLoading}
-                className="bg-blue-700 text-white py-2 rounded-lg font-medium hover:bg-blue-800 hover:scale-105 transition-all duration-200 disabled:opacity-60"
+                className="bg-blue-700 text-white py-2.5 rounded-lg font-medium hover:bg-blue-800 hover:scale-[1.02] transition-all duration-200 disabled:opacity-60"
               >
                 {reschedulingLoading ? "Sending..." : "Send New Time"}
               </button>
