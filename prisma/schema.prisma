@@ -28,6 +28,8 @@ model User {
   matricNumber String?
   level        String?
   studyMode    String?
+  resetToken   String?  @unique
+  resetTokenExpiry DateTime?
   createdAt    DateTime @default(now())
 }
 

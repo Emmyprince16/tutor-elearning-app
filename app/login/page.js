@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mail, Lock, User, GraduationCap, AlertCircle, Check, X, IdCard, BookOpen, Code, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -428,6 +429,13 @@ export default function LoginPage() {
                   </li>
                 </ul>
               )}
+{isLogin && (
+  <p className="text-right mt-1">
+    <Link href="/forgot-password" className="text-sm text-green-800 hover:underline">
+      Forgot password?
+    </Link>
+  </p>
+)}
 
               {errors.password && (
                 <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
