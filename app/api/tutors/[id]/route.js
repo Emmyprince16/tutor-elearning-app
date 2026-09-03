@@ -16,6 +16,7 @@ export async function GET(request, { params }) {
         bio: true,
         role: true,
         isAvailable: true,
+        prefix: true,
       },
     });
 

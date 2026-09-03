@@ -13,6 +13,7 @@ export async function GET() {
         option: true,
         rating: true,
         bio: true,
+        prefix: true, 
       },
     });
 

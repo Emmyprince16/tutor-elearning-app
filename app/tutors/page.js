@@ -75,7 +75,7 @@ export default function TutorsPage() {
             <div key={tutor.id} className={`animate-stagger animate-stagger-${Math.min(index + 1, 6)}`}>
               <TutorCard
                 id={tutor.id}
-                name={`${tutor.firstName}, ${tutor.lastName}`}
+                name={`${tutor.prefix ? tutor.prefix + " " : ""}${tutor.firstName}, ${tutor.lastName}`}
                 subject={tutor.subject}
                 rating={tutor.rating}
               />

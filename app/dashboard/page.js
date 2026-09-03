@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { User, BookOpen, Tag, FileText, CheckCircle, Star } from "lucide-react";
 
 export default function TutorDashboard() {
+  const [prefix, setPrefix] = useState("Mr.");
+  const prefixes = ["Mr.", "Mrs.", "Miss", "Dr.", "Prof.", "Engr."];
   const [user, setUser] = useState(null);
   const [bio, setBio] = useState("");
   const [subject, setSubject] = useState("");
@@ -22,6 +24,7 @@ export default function TutorDashboard() {
       setBio(parsedUser.bio || "");
       setSubject(parsedUser.subject || "");
       setOption(parsedUser.option || "General");
+      setPrefix(parsedUser.prefix || "Mr.");
       setIsAvailable(
         parsedUser.isAvailable !== undefined ? parsedUser.isAvailable : true
       );
@@ -37,7 +40,7 @@ export default function TutorDashboard() {
       const response = await fetch("/api/tutors/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, bio, subject, option, isAvailable }),
+        body: JSON.stringify({ id: user.id, bio, subject, option, isAvailable, prefix }),
       });
 
       const data = await response.json();
@@ -81,7 +84,7 @@ export default function TutorDashboard() {
             className="text-xl font-bold text-white"
             style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
           >
-            {user.firstName}, {user.lastName}
+            {prefix} {user.firstName}, {user.lastName}
           </h2>
           <span
             className={`text-xs font-medium px-3 py-1 rounded-full ${
@@ -104,9 +107,26 @@ export default function TutorDashboard() {
             <User size={16} /> Name
           </label>
           <p className="text-gray-900 font-medium">
-            {user.firstName}, {user.lastName}
+            {prefix} {user.firstName}, {user.lastName}
           </p>
         </div>
+
+            <div>
+  <label className="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">
+    <Tag size={16} /> Title
+  </label>
+  <select
+    value={prefix}
+    onChange={(e) => setPrefix(e.target.value)}
+    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-700"
+  >
+    {prefixes.map((p) => (
+      <option key={p} value={p}>
+        {p}
+      </option>
+    ))}
+  </select>
+</div>
 
         <div className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3">
           <div>

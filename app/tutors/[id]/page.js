@@ -165,7 +165,7 @@ export default function TutorProfile({ params }) {
               className="text-2xl font-bold text-white"
               style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
             >
-              {tutor.firstName}, {tutor.lastName}
+              {tutor.prefix ? tutor.prefix + " " : ""}{tutor.firstName}, {tutor.lastName}
             </h1>
             {!tutor.isAvailable && (
               <span className="text-xs font-medium bg-white/15 text-white px-3 py-1 rounded-full">
