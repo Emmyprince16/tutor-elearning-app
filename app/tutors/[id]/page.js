@@ -80,7 +80,7 @@ export default function TutorProfile({ params }) {
           studentId: user.id,
           studentName: `${user.firstName}, ${user.lastName}`,
           tutorId: tutor.id,
-          tutorName: `${tutor.firstName}, ${tutor.lastName}`,
+          tutorName: `${tutor.prefix ? tutor.prefix + " " : ""}${tutor.firstName}, ${tutor.lastName}`,
           subject: tutor.subject,
           date,
           time,
@@ -225,13 +225,13 @@ export default function TutorProfile({ params }) {
             <div className="flex flex-col items-center text-center gap-3 py-6">
               <MessageCircle className="text-green-800" size={40} />
               <h2 className="text-lg font-semibold text-gray-800">
-                Get in touch with {tutor.firstName}
-              </h2>
+  Get in touch with {tutor.prefix ? tutor.prefix + " " : ""}{tutor.firstName}
+</h2>
               <p className="text-gray-500 text-sm">
                 You can message fellow tutors directly instead of booking a session.
               </p>
               <Link
-                href={`/messages/${tutor.id}?name=${encodeURIComponent(`${tutor.firstName}, ${tutor.lastName}`)}`}
+                href={`/messages/${tutor.id}?name=${encodeURIComponent(`${tutor.prefix ? tutor.prefix + " " : ""}${tutor.firstName}, ${tutor.lastName}`)}`}
                 className="mt-2 bg-green-800 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-900 hover:scale-[1.02] transition-all duration-200"
               >
                 Send a Message

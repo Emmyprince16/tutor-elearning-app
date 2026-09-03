@@ -98,7 +98,7 @@ export default function TutorHomePage() {
             className="text-3xl font-bold mb-2"
             style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
           >
-            {user.firstName}, {user.lastName}
+            {user.prefix ? user.prefix + " " : ""}{user.firstName}, {user.lastName}
           </h1>
           <p className="text-green-100">
             Here's a quick look at your tutoring activity today.
